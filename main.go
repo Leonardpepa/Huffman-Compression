@@ -18,6 +18,46 @@ type HuffmanTreeNode struct {
 	code   string
 }
 
+func main() {
+	fmt.Println("Hello, huffman!")
+
+	//file, err := os.Open("gutenberg.txt")
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//
+	//charFrequencies, err := calculateFrequencies(bufio.NewReader(file))
+	//
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+
+	charFrequencies := map[rune]uint64{
+		'Z': 2,
+		'K': 7,
+		'M': 24,
+		'C': 32,
+		'U': 37,
+		'D': 42,
+		'L': 42,
+		'E': 120,
+	}
+
+	treeNodes := createSliceFromMap(charFrequencies)
+
+	root := buildTree(treeNodes)
+	calculateCodeForEachChar(root)
+
+	traverseTree(root)
+	decoded, err := decodeString(root, "1111010100")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("%#v", decoded)
+}
+
 func createLeafNode(char rune, freq uint64) *HuffmanTreeNode {
 	return &HuffmanTreeNode{left: nil, right: nil, char: char, weight: freq, isLeaf: true}
 }
@@ -73,47 +113,6 @@ func createSliceFromMap(charFrequencies map[rune]uint64) []*HuffmanTreeNode {
 
 	return treeNodes
 }
-
-func main() {
-	fmt.Println("Hello, huffman!")
-
-	//file, err := os.Open("gutenberg.txt")
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//
-	//charFrequencies, err := calculateFrequencies(bufio.NewReader(file))
-	//
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-
-	charFrequencies := map[rune]uint64{
-		'Z': 2,
-		'K': 7,
-		'M': 24,
-		'C': 32,
-		'U': 37,
-		'D': 42,
-		'L': 42,
-		'E': 120,
-	}
-
-	treeNodes := createSliceFromMap(charFrequencies)
-
-	root := buildTree(treeNodes)
-	calculateCodeForEachChar(root)
-
-	traverseTree(root)
-	decoded, err := decodeString(root, "1111010100")
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Printf("%#v", decoded)
-}
-
 func deleteElement(slice []*HuffmanTreeNode, index int) ([]*HuffmanTreeNode, *HuffmanTreeNode) {
 	item := slice[index]
 	return append(slice[:index], slice[index+1:]...), item
@@ -193,6 +192,5 @@ func decodeString(node *HuffmanTreeNode, code string) (string, error) {
 		}
 
 	}
-
 	return strBuilder.String(), nil
 }
