@@ -56,6 +56,9 @@ func main() {
 	}
 
 	fmt.Printf("%#v", decoded)
+
+	fmt.Println(encodeHuffmanHeaderInformation(root))
+
 }
 
 func createLeafNode(char rune, freq uint64) *HuffmanTreeNode {
@@ -193,4 +196,33 @@ func decodeString(node *HuffmanTreeNode, code string) (string, error) {
 
 	}
 	return strBuilder.String(), nil
+}
+
+func encodeHuffmanHeaderInformation(node *HuffmanTreeNode) string {
+	var builder strings.Builder
+
+	recursiveHeaderEncoding(node, &builder)
+
+	return builder.String()
+}
+
+func recursiveHeaderEncoding(node *HuffmanTreeNode, builder *strings.Builder) {
+	if node == nil {
+		log.Fatal("error nil pointer given for header encoding")
+	}
+
+	if node.left != nil {
+		recursiveHeaderEncoding(node.left, builder)
+	}
+	if node.isLeaf {
+		builder.WriteByte('1')
+		builder.WriteRune(node.char)
+	} else {
+		builder.WriteByte('0')
+	}
+
+	if node.right != nil {
+		recursiveHeaderEncoding(node.right, builder)
+	}
+
 }
