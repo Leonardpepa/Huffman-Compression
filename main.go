@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"bytes"
 	"fmt"
 	"io"
 	"log"
@@ -18,60 +17,60 @@ type HuffmanTreeNode struct {
 	weight uint64
 	char   rune
 	isLeaf bool
-	code   string
+	code   []byte
 }
 
 func main() {
 	fmt.Println("Hello, huffman!")
 
-	//file, err := os.Open("gutenberg.txt")
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//
-	//defer func(file *os.File) {
-	//	err := file.Close()
-	//	if err != nil {
-	//
-	//	}
-	//}(file)
-	//
-	//reader := bufio.NewReader(file)
-	//charFrequencies, err := calculateFrequencies(reader)
-	//
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-
-	charFrequencies := map[rune]uint64{
-		'Z': 2,
-		'K': 7,
-		'M': 24,
-		'C': 32,
-		'U': 37,
-		'D': 42,
-		'L': 42,
-		'E': 120,
+	file, err := os.Open("gutenberg.txt")
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+
+		}
+	}(file)
+
+	reader := bufio.NewReader(file)
+	charFrequencies, numOfChars, err := calculateFrequencies(reader)
+	fmt.Println(numOfChars)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	//charFrequencies := map[rune]uint64{
+	//	'Z': 2,
+	//	'K': 7,
+	//	'M': 24,
+	//	'C': 32,
+	//	'U': 37,
+	//	'D': 42,
+	//	'L': 42,
+	//	'E': 120,
+	//}
 
 	treeNodes := createSliceFromMap(charFrequencies)
 
 	root := buildHuffmanTree(treeNodes)
 
-	table := make(map[rune]string)
+	table := make(map[rune][]byte)
 
 	calculateCodeForEachChar(root, table)
 
 	traverseTree(root)
-	fmt.Println(table)
 
-	reader := bufio.NewReader(bytes.NewReader([]byte("EU")))
-	compressData(root, table, reader)
+	_, err = file.Seek(0, io.SeekStart)
+	if err != nil {
+		return
+	}
+	compressData(root, table, numOfChars, reader)
 }
 
-func compressData(root *HuffmanTreeNode, table map[rune]string, reader *bufio.Reader) {
-	encodedTree := encodeHuffmanHeaderInformation(root)
-
+func compressData(root *HuffmanTreeNode, table map[rune][]byte, numOfChars int, reader *bufio.Reader) {
 	output, err := os.Create("encoded.hf")
 	if err != nil {
 		log.Fatal(err)
@@ -82,15 +81,30 @@ func compressData(root *HuffmanTreeNode, table map[rune]string, reader *bufio.Re
 		}
 	}(output)
 
-	// number of characters in header
-	_, err = output.WriteString(string(rune(utf8.RuneCountInString(encodedTree))))
+	encodedTree := encodeHuffmanHeaderInformation(root)
+
+	compressedData := getCompressedData(reader, table)
+
+	_, err = output.WriteString(string(rune(utf8.RuneCount(compressedData))))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = output.WriteString(string(rune(utf8.RuneCount(encodedTree))))
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = output.WriteString(string(rune(numOfChars)))
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	writeBytes(encodedTree, output)
-
-	writeCompressedData(reader, output, table)
+	writeBytes(compressedData, output)
 }
 
-func writeCompressedData(reader *bufio.Reader, output *os.File, table map[rune]string) {
+func getCompressedData(reader *bufio.Reader, table map[rune][]byte) []byte {
+	var b []byte
 	for {
 		r, _, err := reader.ReadRune()
 		if err != nil {
@@ -99,29 +113,15 @@ func writeCompressedData(reader *bufio.Reader, output *os.File, table map[rune]s
 			}
 			log.Fatal(err)
 		}
-
-		writeBytes(table[r], output)
+		b = append(b, table[r]...)
 	}
+	return b
 }
 
-func writeBytes(encodedTree string, output *os.File) {
-	for _, val := range encodedTree {
-		if val == '0' {
-			_, err := output.Write([]byte{0})
-			if err != nil {
-				log.Fatal(err)
-			}
-		} else if val == '1' {
-			_, err := output.Write([]byte{1})
-			if err != nil {
-				log.Fatal(err)
-			}
-		} else {
-			_, err := output.Write([]byte(string(val)))
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
+func writeBytes(data []byte, output *os.File) {
+	_, err := output.Write(data)
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 
@@ -154,8 +154,8 @@ func buildHuffmanTree(nodes []*HuffmanTreeNode) *HuffmanTreeNode {
 	sortHuffmanSlice(nodes)
 
 	for len(nodes) > 1 {
-		nodes, a = deleteAndReturn(nodes, 0)
-		nodes, b = deleteAndReturn(nodes, 0)
+		a = deleteAndReturn(&nodes, 0)
+		b = deleteAndReturn(&nodes, 0)
 
 		root = createHuffmanNode(a, b)
 
@@ -181,30 +181,31 @@ func createSliceFromMap(charFrequencies map[rune]uint64) []*HuffmanTreeNode {
 
 	return treeNodes
 }
-func deleteAndReturn(slice []*HuffmanTreeNode, index int) ([]*HuffmanTreeNode, *HuffmanTreeNode) {
-	item := slice[index]
-	return append(slice[:index], slice[index+1:]...), item
+func deleteAndReturn(slice *[]*HuffmanTreeNode, index int) *HuffmanTreeNode {
+	item := (*slice)[index]
+	*slice = append((*slice)[:index], (*slice)[index+1:]...)
+	return item
 }
 
-func calculateCodeForEachChar(node *HuffmanTreeNode, table map[rune]string) {
+func calculateCodeForEachChar(node *HuffmanTreeNode, table map[rune][]byte) {
 	var c []byte
 	calculateCode(node, table, c)
 }
 
-func calculateCode(node *HuffmanTreeNode, table map[rune]string, c []byte) {
+func calculateCode(node *HuffmanTreeNode, table map[rune][]byte, c []byte) {
 	if node.left != nil {
 		l := slices.Clone(c)
-		l = append(l, '0')
+		l = append(l, 0)
 
 		calculateCode(node.left, table, l)
 	}
 	if node.isLeaf {
-		node.code = string(c)
+		node.code = c
 		table[node.char] = node.code
 	}
 	if node.right != nil {
 		r := slices.Clone(c)
-		r = append(r, '1')
+		r = append(r, 1)
 
 		calculateCode(node.right, table, r)
 	}
@@ -222,80 +223,53 @@ func traverseTree(root *HuffmanTreeNode) {
 	}
 }
 
-func calculateFrequencies(reader *bufio.Reader) (map[rune]uint64, error) {
+func calculateFrequencies(reader *bufio.Reader) (map[rune]uint64, int, error) {
 	frequencies := make(map[rune]uint64)
-
+	count := 0
 	for {
 		char, _, err := reader.ReadRune()
 		if err != nil {
 			if err == io.EOF {
 				break
 			}
-			return nil, err
+			return nil, 0, err
 		}
 
 		frequencies[char]++
+		count++
 	}
 
-	return frequencies, nil
+	return frequencies, count, nil
 }
 
-func encodeHuffmanHeaderInformation(node *HuffmanTreeNode) string {
-	var builder strings.Builder
+func encodeHuffmanHeaderInformation(node *HuffmanTreeNode) []byte {
 	// root node
-	builder.WriteRune('0')
-	recursiveHeaderEncoding(node, &builder)
+	b := []byte{0}
 
-	return builder.String()
+	recursiveHeaderEncoding(node, &b)
+	return b
 }
 
-func recursiveHeaderEncoding(node *HuffmanTreeNode, builder *strings.Builder) {
+func recursiveHeaderEncoding(node *HuffmanTreeNode, b *[]byte) {
 	if node == nil {
 		log.Fatal("error nil pointer given for header encoding")
 	}
 
 	if node.left != nil {
-		recursiveHeaderEncoding(node.left, builder)
+		recursiveHeaderEncoding(node.left, b)
 	}
 	if node.isLeaf {
-		builder.WriteByte('1')
-		builder.WriteRune(node.char)
+		*b = append(*b, 1)
 	} else {
-		builder.WriteByte('0')
+		*b = append(*b, 0)
 	}
 
 	if node.right != nil {
-		recursiveHeaderEncoding(node.right, builder)
+		recursiveHeaderEncoding(node.right, b)
 	}
 
 }
 
-func decodeString(node *HuffmanTreeNode, code string) (string, error) {
-	var strBuilder strings.Builder
-	temp := node
-
-	for _, val := range code {
-		switch val {
-		case '0':
-			temp = temp.left
-		case '1':
-			temp = temp.right
-		default:
-			return "", fmt.Errorf("something went wrong, input != 0 || 1")
-		}
-
-		if temp == nil {
-			return "", fmt.Errorf("nil reference")
-		}
-		if temp.isLeaf {
-			strBuilder.WriteRune(temp.char)
-			temp = node
-			continue
-		}
-
-	}
-	return strBuilder.String(), nil
-}
 func decodeBytes(node *HuffmanTreeNode, code []byte) (string, error) {
 	var strBuilder strings.Builder
 	temp := node
