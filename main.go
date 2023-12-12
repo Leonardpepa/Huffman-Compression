@@ -63,6 +63,7 @@ func main() {
 	calculateCodeForEachChar(root, table)
 
 	traverseTree(root)
+	fmt.Println(table)
 
 	reader := bufio.NewReader(bytes.NewReader([]byte("EU")))
 	compressData(root, table, reader)
@@ -71,7 +72,7 @@ func main() {
 func compressData(root *HuffmanTreeNode, table map[rune]string, reader *bufio.Reader) {
 	encodedTree := encodeHuffmanHeaderInformation(root)
 
-	output, err := os.Create("encoded.txt")
+	output, err := os.Create("encoded.hf")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -84,11 +85,12 @@ func compressData(root *HuffmanTreeNode, table map[rune]string, reader *bufio.Re
 	// number of characters in header
 	_, err = output.WriteString(string(rune(utf8.RuneCountInString(encodedTree))))
 
-	_, err = output.WriteString(encodedTree)
-	if err != nil {
-		log.Fatal(err)
-	}
+	writeBytes(encodedTree, output)
 
+	writeCompressedData(reader, output, table)
+}
+
+func writeCompressedData(reader *bufio.Reader, output *os.File, table map[rune]string) {
 	for {
 		r, _, err := reader.ReadRune()
 		if err != nil {
@@ -97,10 +99,28 @@ func compressData(root *HuffmanTreeNode, table map[rune]string, reader *bufio.Re
 			}
 			log.Fatal(err)
 		}
-		// TODO: store bits not strings
-		_, err = output.WriteString(table[r])
-		if err != nil {
-			log.Fatal(err)
+
+		writeBytes(table[r], output)
+	}
+}
+
+func writeBytes(encodedTree string, output *os.File) {
+	for _, val := range encodedTree {
+		if val == '0' {
+			_, err := output.Write([]byte{0})
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else if val == '1' {
+			_, err := output.Write([]byte{1})
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			_, err := output.Write([]byte(string(val)))
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	}
 }
@@ -259,6 +279,32 @@ func decodeString(node *HuffmanTreeNode, code string) (string, error) {
 		case '0':
 			temp = temp.left
 		case '1':
+			temp = temp.right
+		default:
+			return "", fmt.Errorf("something went wrong, input != 0 || 1")
+		}
+
+		if temp == nil {
+			return "", fmt.Errorf("nil reference")
+		}
+		if temp.isLeaf {
+			strBuilder.WriteRune(temp.char)
+			temp = node
+			continue
+		}
+
+	}
+	return strBuilder.String(), nil
+}
+func decodeBytes(node *HuffmanTreeNode, code []byte) (string, error) {
+	var strBuilder strings.Builder
+	temp := node
+
+	for _, val := range code {
+		switch val {
+		case 0:
+			temp = temp.left
+		case 1:
 			temp = temp.right
 		default:
 			return "", fmt.Errorf("something went wrong, input != 0 || 1")
