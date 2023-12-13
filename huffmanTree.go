@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"slices"
+	"sort"
 )
 
 type HuffmanTreeNode struct {
@@ -55,9 +55,12 @@ func buildHuffmanTree(nodes []*HuffmanTreeNode) *HuffmanTreeNode {
 }
 
 func sortHuffmanSlice(array []*HuffmanTreeNode) {
-	slices.SortFunc(array, func(a, b *HuffmanTreeNode) int {
-		return int(a.weight - b.weight)
+	sort.Slice(array, func(i, j int) bool {
+		return array[i].weight < array[j].weight
 	})
+	//slices.SortFunc(array, func(a, b *HuffmanTreeNode) int {
+	//	return int(a.weight - b.weight)
+	//})
 }
 
 // create priority queue

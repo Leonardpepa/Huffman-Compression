@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"slices"
@@ -9,30 +11,30 @@ import (
 )
 
 func main() {
-	//file := readFile("gutenberg.txt")
-	//
-	//defer func(file *os.File) {
-	//	err := file.Close()
-	//	if err != nil {
-	//
-	//	}
-	//}(file)
-	//
-	//charFrequencies, err := calculateFrequencies(bufio.NewReader(file))
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
+	file := readFile("gutenberg.txt")
 
-	charFrequencies := map[rune]uint64{
-		'Z': 2,
-		'K': 7,
-		'M': 24,
-		'C': 32,
-		'U': 37,
-		'D': 42,
-		'L': 42,
-		'E': 120,
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+
+		}
+	}(file)
+
+	charFrequencies, err := calculateFrequencies(bufio.NewReader(file))
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	//charFrequencies := map[rune]uint64{
+	//	'Z': 2,
+	//	'K': 7,
+	//	'M': 24,
+	//	'C': 32,
+	//	'U': 37,
+	//	'D': 42,
+	//	'L': 42,
+	//	'E': 120,
+	//}
 
 	treeNodes := createSliceFromMap(charFrequencies)
 
@@ -44,13 +46,70 @@ func main() {
 
 	traverseTree(root)
 
-	text, err := decodeText(root, "1100101")
+	_, err = file.Seek(0, io.SeekStart)
+	if err != nil {
+		log.Fatal(err)
+	}
+	byteArray := compressData(table, bufio.NewReader(file))
+
+	err = os.WriteFile("test.hf", byteArray, 0666)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	strToBeDecoded := formatBitString(byteArray)
+	//fmt.Println(strToBeDecoded)
+	text, err := decodeText(root, strToBeDecoded[0:1000])
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Println(text)
+	//b := make([]byte, 0)
+	//fmt.Printf("%08b\n", b)
 
+}
+
+func formatBitString(byteArray []byte) string {
+	strToBeDecoded := fmt.Sprintf("%b", byteArray)
+	strToBeDecoded = strings.TrimFunc(strings.Join(strings.Fields(strToBeDecoded), ""), func(r rune) bool {
+		return r == '[' || r == ']'
+	})
+	return strToBeDecoded
+}
+
+func compressData(table map[rune]string, reader *bufio.Reader) []byte {
+
+	byteArray := make([]byte, 0)
+	x := byte(0)
+
+	for {
+		c, _, err := reader.ReadRune()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			log.Fatal(err)
+		}
+
+		count := 0
+
+		for _, bitt := range table[c] {
+
+			if bitt == '1' {
+				x = x<<1 | 1
+			} else if bitt == '0' {
+				x = x << 1
+			}
+			count++
+
+			if count == 8 || count == len(table[c]) {
+				byteArray = append(byteArray, x)
+				count = 0
+				x = byte(0)
+			}
+		}
+	}
+	return byteArray
 }
 
 func readFile(filename string) *os.File {
@@ -89,10 +148,10 @@ func calculateCode(node *HuffmanTreeNode, table map[rune]string, c []byte) {
 
 func encodeHuffmanHeaderInformation(node *HuffmanTreeNode) string {
 	// root node
-	var strBuilder *strings.Builder
+	var strBuilder strings.Builder
 	strBuilder.WriteRune('0')
 
-	recursiveHeaderEncoding(node, strBuilder)
+	recursiveHeaderEncoding(node, &strBuilder)
 	return strBuilder.String()
 }
 
@@ -106,6 +165,7 @@ func recursiveHeaderEncoding(node *HuffmanTreeNode, builder *strings.Builder) {
 	}
 	if node.isLeaf {
 		builder.WriteRune('1')
+		builder.WriteRune(node.char)
 	} else {
 		builder.WriteRune('0')
 	}
