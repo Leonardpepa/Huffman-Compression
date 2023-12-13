@@ -1,30 +1,15 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"io"
 	"log"
+	"os"
 	"slices"
 	"strings"
 )
 
-type HuffmanTreeNode struct {
-	left   *HuffmanTreeNode
-	right  *HuffmanTreeNode
-	weight uint64
-	char   rune
-	isLeaf bool
-	code   string
-}
-
 func main() {
-	fmt.Println("Hello, huffman!")
-
-	//file, err := os.Open("gutenberg.txt")
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
+	//file := readFile("gutenberg.txt")
 	//
 	//defer func(file *os.File) {
 	//	err := file.Close()
@@ -33,8 +18,7 @@ func main() {
 	//	}
 	//}(file)
 	//
-	//reader := bufio.NewReader(file)
-	//charFrequencies, err := calculateFrequencies(reader)
+	//charFrequencies, err := calculateFrequencies(bufio.NewReader(file))
 	//if err != nil {
 	//	log.Fatal(err)
 	//}
@@ -69,66 +53,14 @@ func main() {
 
 }
 
-func createLeafNode(char rune, freq uint64) *HuffmanTreeNode {
-	return &HuffmanTreeNode{left: nil, right: nil, char: char, weight: freq, isLeaf: true}
-}
+func readFile(filename string) *os.File {
+	file, err := os.Open(filename)
 
-func createHuffmanNode(a *HuffmanTreeNode, b *HuffmanTreeNode) *HuffmanTreeNode {
-	var leftNode *HuffmanTreeNode
-	var rightNode *HuffmanTreeNode
-	if a.weight <= b.weight {
-		leftNode = a
-		rightNode = b
-	} else {
-		leftNode = b
-		rightNode = a
-	}
-	return &HuffmanTreeNode{
-		left:   leftNode,
-		right:  rightNode,
-		weight: leftNode.weight + rightNode.weight,
-		isLeaf: false,
-	}
-}
-
-func buildHuffmanTree(nodes []*HuffmanTreeNode) *HuffmanTreeNode {
-	var a *HuffmanTreeNode
-	var b *HuffmanTreeNode
-	var root *HuffmanTreeNode
-	sortHuffmanSlice(nodes)
-
-	for len(nodes) > 1 {
-		a = deleteAndReturn(&nodes, 0)
-		b = deleteAndReturn(&nodes, 0)
-
-		root = createHuffmanNode(a, b)
-
-		nodes = append(nodes, root)
-		sortHuffmanSlice(nodes)
-	}
-	return root
-}
-
-func sortHuffmanSlice(array []*HuffmanTreeNode) {
-	slices.SortFunc(array, func(a, b *HuffmanTreeNode) int {
-		return int(a.weight - b.weight)
-	})
-}
-
-// create priority queue
-func createSliceFromMap(charFrequencies map[rune]uint64) []*HuffmanTreeNode {
-	treeNodes := make([]*HuffmanTreeNode, 0)
-
-	for key, val := range charFrequencies {
-		treeNodes = append(treeNodes, createLeafNode(key, val))
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	return treeNodes
-}
-func deleteAndReturn(slice *[]*HuffmanTreeNode, index int) *HuffmanTreeNode {
-	item := (*slice)[index]
-	*slice = append((*slice)[:index], (*slice)[index+1:]...)
-	return item
+	return file
 }
 
 func calculateCodeForEachChar(node *HuffmanTreeNode, table map[rune]string) {
@@ -153,35 +85,6 @@ func calculateCode(node *HuffmanTreeNode, table map[rune]string, c []byte) {
 
 		calculateCode(node.right, table, r)
 	}
-}
-
-func traverseTree(root *HuffmanTreeNode) {
-	if root.left != nil {
-		traverseTree(root.left)
-	}
-	if root.isLeaf {
-		fmt.Printf("char: %#v, freq: %d, code: %v, bits: %d\n", string(root.char), root.weight, root.code, len(root.code))
-	}
-	if root.right != nil {
-		traverseTree(root.right)
-	}
-}
-
-func calculateFrequencies(reader *bufio.Reader) (map[rune]uint64, error) {
-	frequencies := make(map[rune]uint64)
-	for {
-		char, _, err := reader.ReadRune()
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			return nil, err
-		}
-
-		frequencies[char]++
-	}
-
-	return frequencies, nil
 }
 
 func encodeHuffmanHeaderInformation(node *HuffmanTreeNode) string {
