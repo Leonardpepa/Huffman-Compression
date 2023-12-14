@@ -3,7 +3,6 @@ package main
 import (
 	"container/heap"
 	"fmt"
-	"sort"
 )
 
 type HuffmanTreeNode struct {
@@ -75,28 +74,19 @@ func createHuffmanNode(a *HuffmanTreeNode, b *HuffmanTreeNode) *HuffmanTreeNode 
 	}
 }
 
-func buildHuffmanTree(nodes []*HuffmanTreeNode) *HuffmanTreeNode {
+func buildHuffmanTree(pq PriorityQueue) *HuffmanTreeNode {
 	var a *HuffmanTreeNode
 	var b *HuffmanTreeNode
 	var root *HuffmanTreeNode
-	sortHuffmanSlice(nodes)
 
-	for len(nodes) > 1 {
-		a = deleteAndReturn(&nodes, 0)
-		b = deleteAndReturn(&nodes, 0)
-
+	for pq.Len() > 1 {
+		a = heap.Pop(&pq).(*HuffmanTreeNode)
+		b = heap.Pop(&pq).(*HuffmanTreeNode)
 		root = createHuffmanNode(a, b)
 
-		nodes = append(nodes, root)
-		sortHuffmanSlice(nodes)
+		heap.Push(&pq, root)
 	}
 	return root
-}
-
-func sortHuffmanSlice(array []*HuffmanTreeNode) {
-	sort.Slice(array, func(i, j int) bool {
-		return array[i].weight < array[j].weight
-	})
 }
 
 // create priority queue
@@ -114,11 +104,6 @@ func createPriorityQueue(charFrequencies map[rune]uint64) PriorityQueue {
 	heap.Init(&pq)
 
 	return pq
-}
-func deleteAndReturn(slice *[]*HuffmanTreeNode, index int) *HuffmanTreeNode {
-	item := (*slice)[index]
-	*slice = append((*slice)[:index], (*slice)[index+1:]...)
-	return item
 }
 
 func traverseTree(root *HuffmanTreeNode) {

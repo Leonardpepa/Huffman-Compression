@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"container/heap"
 	"fmt"
 	"io"
 	"log"
@@ -39,17 +38,13 @@ func main() {
 
 	priorityQueue := createPriorityQueue(charFrequencies)
 
-	for priorityQueue.Len() > 0 {
-		item := heap.Pop(&priorityQueue).(*HuffmanTreeNode)
-		fmt.Printf("%+v\n", item.weight)
-	}
-	//root := buildHuffmanTree(treeNodes)
-	//
-	//table := make(map[rune]string)
-	//
-	//calculateCodeForEachChar(root, table)
-	//
-	//traverseTree(root)
+	root := buildHuffmanTree(priorityQueue)
+
+	table := make(map[rune]string)
+
+	calculateCodeForEachChar(root, table)
+
+	traverseTree(root)
 }
 
 func formatBitString(byteArray []byte) string {
