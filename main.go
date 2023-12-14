@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"container/heap"
 	"fmt"
 	"io"
 	"log"
@@ -11,62 +12,44 @@ import (
 )
 
 func main() {
-	file := readFile("gutenberg.txt")
-
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-
-		}
-	}(file)
-
-	charFrequencies, err := calculateFrequencies(bufio.NewReader(file))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	//charFrequencies := map[rune]uint64{
-	//	'Z': 2,
-	//	'K': 7,
-	//	'M': 24,
-	//	'C': 32,
-	//	'U': 37,
-	//	'D': 42,
-	//	'L': 42,
-	//	'E': 120,
+	//file := readFile("gutenberg.txt")
+	//
+	//defer func(file *os.File) {
+	//	err := file.Close()
+	//	if err != nil {
+	//
+	//	}
+	//}(file)
+	//
+	//charFrequencies, err := calculateFrequencies(bufio.NewReader(file))
+	//if err != nil {
+	//	log.Fatal(err)
 	//}
 
-	treeNodes := createSliceFromMap(charFrequencies)
-
-	root := buildHuffmanTree(treeNodes)
-
-	table := make(map[rune]string)
-
-	calculateCodeForEachChar(root, table)
-
-	traverseTree(root)
-
-	_, err = file.Seek(0, io.SeekStart)
-	if err != nil {
-		log.Fatal(err)
-	}
-	byteArray := compressData(table, bufio.NewReader(file))
-
-	err = os.WriteFile("test.hf", byteArray, 0666)
-	if err != nil {
-		log.Fatal(err)
+	charFrequencies := map[rune]uint64{
+		'Z': 2,
+		'K': 7,
+		'M': 24,
+		'C': 32,
+		'U': 37,
+		'D': 42,
+		'L': 42,
+		'E': 120,
 	}
 
-	strToBeDecoded := formatBitString(byteArray)
-	//fmt.Println(strToBeDecoded)
-	text, err := decodeText(root, strToBeDecoded[0:1000])
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(text)
-	//b := make([]byte, 0)
-	//fmt.Printf("%08b\n", b)
+	priorityQueue := createPriorityQueue(charFrequencies)
 
+	for priorityQueue.Len() > 0 {
+		item := heap.Pop(&priorityQueue).(*HuffmanTreeNode)
+		fmt.Printf("%+v\n", item.weight)
+	}
+	//root := buildHuffmanTree(treeNodes)
+	//
+	//table := make(map[rune]string)
+	//
+	//calculateCodeForEachChar(root, table)
+	//
+	//traverseTree(root)
 }
 
 func formatBitString(byteArray []byte) string {
