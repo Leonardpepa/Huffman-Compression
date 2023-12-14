@@ -5,7 +5,7 @@ import (
 	"io"
 )
 
-func calculateFrequencies(reader *bufio.Reader) (map[rune]uint64, error) {
+func CalculateFrequencies(reader *bufio.Reader) (map[rune]uint64, error) {
 	frequencies := make(map[rune]uint64)
 	for {
 		char, _, err := reader.ReadRune()
