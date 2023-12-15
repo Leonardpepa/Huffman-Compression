@@ -5,9 +5,10 @@ import (
 	"io"
 )
 
-var PseudoEOF = rune(150000)
+var PseudoEOF = '\U0000FDEF'
 
 func CalculateFrequencies(reader *bufio.Reader) (map[rune]uint64, error) {
+
 	frequencies := make(map[rune]uint64)
 	for {
 		char, _, err := reader.ReadRune()
