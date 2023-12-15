@@ -111,7 +111,7 @@ func TraverseTree(root *HuffmanTreeNode) {
 		TraverseTree(root.Left)
 	}
 	if root != nil && root.IsLeaf {
-		fmt.Printf("Char: %#v, freq: %d, Code: %v, bits: %d\n", string(root.Char), root.Weight, root.Code, len(root.Code))
+		fmt.Printf("Char: %v, %#v, freq: %d, Code: %v, bits: %d\n", root.Char, string(root.Char), root.Weight, root.Code, len(root.Code))
 	}
 	if root.Right != nil {
 		TraverseTree(root.Right)

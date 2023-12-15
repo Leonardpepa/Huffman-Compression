@@ -23,6 +23,7 @@ func main() {
 	}(file)
 
 	charFrequencies, err := CalculateFrequencies(bufio.NewReader(file))
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -47,51 +48,81 @@ func main() {
 	calculateCodeForEachChar(root, table)
 
 	TraverseTree(root)
+
+	err = os.WriteFile("test.hf", createBits(file, table), 0666)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	tt := getDecodedText(root, "test.hf")
+	err = os.WriteFile("tt.txt", []byte(tt), 0666)
 }
 
-// TODO take bits and format it correctly in strings
-func formatBitString(byteArray []byte) string {
-	strToBeDecoded := fmt.Sprintf("%b", byteArray)
-	strToBeDecoded = strings.TrimFunc(strings.Join(strings.Fields(strToBeDecoded), ""), func(r rune) bool {
+func getDecodedText(root *HuffmanTreeNode, filename string) string {
+	fileBytes, err := os.ReadFile(filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	res := fmt.Sprintf("%08b", fileBytes)
+	res = strings.TrimFunc(res, func(r rune) bool {
 		return r == '[' || r == ']'
 	})
-	return strToBeDecoded
+	res = strings.Join(strings.Fields(res), "")
+	text, err := decodeText(root, res)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return text
 }
 
-// TODO fix this
-func compressData(table map[rune]string, reader *bufio.Reader) []byte {
-
-	byteArray := make([]byte, 0)
+func createBits(file *os.File, table map[rune]string) []byte {
+	compressedString := getCompressedDataAsString(file, table)
+	arrayOfBytes := make([]byte, 0)
+	count := 0
+	compressedLength := len(compressedString)
 	x := byte(0)
 
+	for _, value := range compressedString {
+		switch value {
+		case '0':
+			x <<= 1
+		case '1':
+			x = x<<1 | 1
+		}
+		count++
+
+		if count == 8 || count == compressedLength {
+			arrayOfBytes = append(arrayOfBytes, x)
+			count = 0
+			x = byte(0)
+		}
+	}
+	return arrayOfBytes
+}
+
+func getCompressedDataAsString(file *os.File, table map[rune]string) string {
+	_, err := file.Seek(0, io.SeekStart)
+	if err != nil {
+		log.Fatal(err)
+	}
+	var builder strings.Builder
+	reader := bufio.NewReader(file)
+
 	for {
-		c, _, err := reader.ReadRune()
+		r, _, err := reader.ReadRune()
+
 		if err != nil {
 			if err == io.EOF {
 				break
 			}
 			log.Fatal(err)
 		}
-
-		count := 0
-
-		for _, bitt := range table[c] {
-
-			if bitt == '1' {
-				x = x<<1 | 1
-			} else if bitt == '0' {
-				x = x << 1
-			}
-			count++
-
-			if count == 8 || count == len(table[c]) {
-				byteArray = append(byteArray, x)
-				count = 0
-				x = byte(0)
-			}
-		}
+		builder.WriteString(table[r])
 	}
-	return byteArray
+
+	builder.WriteString(table[PseudoEOF])
+	return builder.String()
 }
 
 // TODO create cli api
@@ -177,10 +208,13 @@ func decodeText(node *HuffmanTreeNode, code string) (string, error) {
 		if temp == nil {
 			return "", fmt.Errorf("nil reference")
 		}
+
 		if temp.IsLeaf {
+			if temp.Char == PseudoEOF {
+				break
+			}
 			strBuilder.WriteRune(temp.Char)
 			temp = node
-			continue
 		}
 
 	}
