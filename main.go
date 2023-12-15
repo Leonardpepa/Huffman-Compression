@@ -23,7 +23,7 @@ func main() {
 	}(file)
 
 	charFrequencies, err := CalculateFrequencies(bufio.NewReader(file))
-
+	AddPseudoEOF(charFrequencies)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -49,13 +49,6 @@ func main() {
 
 	TraverseTree(root)
 
-	err = os.WriteFile("test.hf", createBits(file, table), 0666)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	tt := getDecodedText(root, "test.hf")
-	err = os.WriteFile("tt.txt", []byte(tt), 0666)
 }
 
 func getDecodedText(root *HuffmanTreeNode, filename string) string {
@@ -121,6 +114,7 @@ func getCompressedDataAsString(file *os.File, table map[rune]string) string {
 		builder.WriteString(table[r])
 	}
 
+	// write the Pseudo EOF in the end of the characters
 	builder.WriteString(table[PseudoEOF])
 	return builder.String()
 }
@@ -210,6 +204,7 @@ func decodeText(node *HuffmanTreeNode, code string) (string, error) {
 		}
 
 		if temp.IsLeaf {
+			// stop when you encounter Pseudo EOF
 			if temp.Char == PseudoEOF {
 				break
 			}

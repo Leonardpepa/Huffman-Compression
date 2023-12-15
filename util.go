@@ -3,10 +3,9 @@ package main
 import (
 	"bufio"
 	"io"
-	"math"
 )
 
-var PseudoEOF = rune(math.MaxInt32)
+var PseudoEOF = rune(150000)
 
 func CalculateFrequencies(reader *bufio.Reader) (map[rune]uint64, error) {
 	frequencies := make(map[rune]uint64)
@@ -21,10 +20,9 @@ func CalculateFrequencies(reader *bufio.Reader) (map[rune]uint64, error) {
 
 		frequencies[char]++
 	}
-
-	if frequencies[PseudoEOF] == 0 {
-		frequencies[PseudoEOF] = 0
-	}
-
 	return frequencies, nil
+}
+
+func AddPseudoEOF(frequencies map[rune]uint64) {
+	frequencies[PseudoEOF] = 0
 }
