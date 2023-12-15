@@ -8,6 +8,7 @@ import (
 type HuffmanTreeNode struct {
 	Left   *HuffmanTreeNode
 	Right  *HuffmanTreeNode
+	Parent *HuffmanTreeNode
 	Weight uint64
 	Char   rune
 	IsLeaf bool
@@ -53,7 +54,7 @@ func (pq *PriorityQueue) update(item *HuffmanTreeNode, weight uint64) {
 }
 
 func CreateLeafNode(char rune, freq uint64) *HuffmanTreeNode {
-	return &HuffmanTreeNode{Left: nil, Right: nil, Char: char, Weight: freq, IsLeaf: true}
+	return &HuffmanTreeNode{Left: nil, Right: nil, Parent: nil, Char: char, Weight: freq, IsLeaf: true}
 }
 
 func CreateHuffmanNode(a *HuffmanTreeNode, b *HuffmanTreeNode) *HuffmanTreeNode {
@@ -66,12 +67,15 @@ func CreateHuffmanNode(a *HuffmanTreeNode, b *HuffmanTreeNode) *HuffmanTreeNode 
 		leftNode = b
 		rightNode = a
 	}
-	return &HuffmanTreeNode{
+	parent := &HuffmanTreeNode{
 		Left:   leftNode,
 		Right:  rightNode,
 		Weight: leftNode.Weight + rightNode.Weight,
 		IsLeaf: false,
 	}
+	leftNode.Parent = parent
+	rightNode.Parent = parent
+	return parent
 }
 
 func BuildHuffmanTree(pq PriorityQueue) *HuffmanTreeNode {
