@@ -211,7 +211,10 @@ func encodeHuffmanHeaderInformation(node *HuffmanTreeNode) (string, error) {
 	// root node
 	var strBuilder strings.Builder
 	err := recursiveHeaderEncoding(node, &strBuilder)
-	return strBuilder.String(), err
+	if err != nil {
+		return "", err
+	}
+	return strBuilder.String(), nil
 }
 
 func recursiveHeaderEncoding(node *HuffmanTreeNode, builder *strings.Builder) error {
