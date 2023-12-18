@@ -19,7 +19,7 @@ func main() {
 	//
 	//root := getHuffmanTreeFromFrequencies(charFrequencies)
 
-	root := getHuffmanTreeFromFile("gutenberg.txt")
+	root := getHuffmanTreeFromFile("input/gutenberg.txt")
 
 	calculateCodeForEachChar(root)
 
