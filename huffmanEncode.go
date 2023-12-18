@@ -50,27 +50,16 @@ func createBits(file *os.File, table map[rune]string) ([]byte, error) {
 	}
 
 	compressedString := *data
-	arrayOfBytes := make([]byte, 0)
-	count := 0
-	compressedLength := len(compressedString)
-	x := byte(0)
+	bitWriter := CreateBitWriter()
 
 	for _, value := range compressedString {
-		switch value {
-		case '0':
-			x <<= 1
-		case '1':
-			x = x<<1 | 1
-		}
-		count++
-
-		if count == 8 || count == compressedLength {
-			arrayOfBytes = append(arrayOfBytes, x)
-			count = 0
-			x = byte(0)
-		}
+		bitWriter.writeBitFromChar(value)
 	}
-	return arrayOfBytes, nil
+
+	if bitWriter.HasRemainingBits() {
+		bitWriter.WriteRemainingBitsWithPadding()
+	}
+	return bitWriter.Bytes(), nil
 }
 
 func getCompressedDataAsString(file *os.File, table map[rune]string) (*string, error) {
