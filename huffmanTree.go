@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"container/heap"
 	"fmt"
+	"log"
+	"os"
 )
 
 type HuffmanTreeNode struct {
@@ -120,4 +123,53 @@ func TraverseTree(root *HuffmanTreeNode) {
 	if root.Right != nil {
 		TraverseTree(root.Right)
 	}
+}
+
+func calculateCodeForEachChar(node *HuffmanTreeNode) map[rune]string {
+	table := make(map[rune]string)
+	calculateCode(node, table, "")
+	return table
+}
+
+func calculateCode(node *HuffmanTreeNode, table map[rune]string, c string) {
+	if node.Left != nil {
+		calculateCode(node.Left, table, c+"0")
+	}
+	if node != nil && node.IsLeaf {
+		node.Code = c
+		table[node.Char] = node.Code
+	}
+	if node.Right != nil {
+		calculateCode(node.Right, table, c+"1")
+	}
+}
+
+func getHuffmanTreeFromFrequencies(charFrequencies map[rune]uint64) *HuffmanTreeNode {
+	priorityQueue := CreatePriorityQueue(charFrequencies)
+
+	root := BuildHuffmanTree(priorityQueue)
+
+	return root
+}
+
+func getHuffmanTreeFromFile(filename string) *HuffmanTreeNode {
+	file := readFile(filename)
+
+	defer func(file *os.File) {
+		_ = file.Close()
+	}(file)
+
+	charFrequencies, err := CalculateFrequencies(bufio.NewReader(file))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	AddPseudoEOF(charFrequencies)
+
+	priorityQueue := CreatePriorityQueue(charFrequencies)
+
+	root := BuildHuffmanTree(priorityQueue)
+
+	return root
 }
