@@ -50,7 +50,7 @@ func (reader *BitReader) HasNext() bool {
 	return reader.offset < reader.length
 }
 
-func (reader *BitReader) GetNextBit() bool {
+func (reader *BitReader) Read() bool {
 	if reader.HasNext() == false {
 		log.Fatal("No more bits to read. Abort")
 	}

@@ -24,7 +24,7 @@ func decodeText(node *HuffmanTreeNode, bitReader *BitReader) (string, error) {
 	temp := node
 
 	for bitReader.HasNext() {
-		switch bitReader.GetNextBit() {
+		switch bitReader.Read() {
 		case false:
 			temp = temp.Left
 		case true:
