@@ -44,31 +44,13 @@ func recursiveHeaderEncoding(node *HuffmanTreeNode, builder *strings.Builder) er
 }
 
 func createBits(file *os.File, table map[rune]string) ([]byte, error) {
-	data, err := getCompressedDataAsString(file, table)
-	if err != nil {
-		return nil, err
-	}
-
-	compressedString := *data
-	bitWriter := CreateBitWriter()
-
-	for _, value := range compressedString {
-		bitWriter.writeBitFromChar(value)
-	}
-
-	if bitWriter.HasRemainingBits() {
-		bitWriter.WriteRemainingBitsWithPadding()
-	}
-	return bitWriter.Bytes(), nil
-}
-
-func getCompressedDataAsString(file *os.File, table map[rune]string) (*string, error) {
 	_, err := file.Seek(0, io.SeekStart)
 	if err != nil {
 		return nil, err
 	}
-	var builder strings.Builder
+
 	reader := bufio.NewReader(file)
+	bitWriter := CreateBitWriter()
 
 	for {
 		r, _, err := reader.ReadRune()
@@ -79,11 +61,20 @@ func getCompressedDataAsString(file *os.File, table map[rune]string) (*string, e
 			}
 			return nil, err
 		}
-		builder.WriteString(table[r])
+
+		for _, value := range table[r] {
+			bitWriter.writeBitFromChar(value)
+		}
 	}
 
-	// write the Pseudo EOF in the end of the characters
-	builder.WriteString(table[PseudoEOF])
-	data := builder.String()
-	return &data, nil
+	// Pseudo EOF
+	for _, value := range table[PseudoEOF] {
+		bitWriter.writeBitFromChar(value)
+	}
+
+	if bitWriter.HasRemainingBits() {
+		bitWriter.WriteRemainingBitsWithPadding()
+	}
+
+	return bitWriter.Bytes(), nil
 }

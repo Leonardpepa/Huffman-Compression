@@ -47,7 +47,6 @@ func main() {
 	}
 
 	fmt.Println(*text)
-
 }
 
 // TODO create cli api
