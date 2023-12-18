@@ -18,6 +18,8 @@ func main() {
 	//	'E': 120,
 	//}
 	//
+	//AddPseudoEOF(charFrequencies)
+	//
 	//root := getHuffmanTreeFromFrequencies(charFrequencies)
 
 	input := "hamlet"
@@ -33,7 +35,7 @@ func main() {
 
 	TraverseTree(root)
 
-	//without header
+	////without header
 	encodedData, err := createBits(file, table)
 	if err != nil {
 		return

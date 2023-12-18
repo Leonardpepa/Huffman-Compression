@@ -115,6 +115,6 @@ func (reader *BitReader) readByte() byte {
 			break
 		}
 	}
-
+	writer.WriteBytes()
 	return writer.Bytes()[0]
 }

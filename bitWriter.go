@@ -75,8 +75,6 @@ func (writer *BitWriter) writeRune(char rune) {
 		bit := bitReader.Read()
 		writer.writeBitFromBool(bit)
 	}
-
-	writer.WriteBytes()
 }
 
 func (writer *BitWriter) WriteBytes() {
@@ -86,7 +84,7 @@ func (writer *BitWriter) WriteBytes() {
 }
 
 func (writer *BitWriter) HasRemainingBits() bool {
-	return writer.count%8 != 0
+	return writer.count != 0 && writer.count%8 != 0
 }
 
 func (writer *BitWriter) WriteRemainingBitsWithPadding() {

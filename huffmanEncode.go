@@ -5,39 +5,41 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 )
 
-func encodeHuffmanHeaderInformation(node *HuffmanTreeNode) (*string, error) {
+func encodeHuffmanHeaderInformation(node *HuffmanTreeNode) ([]byte, error) {
 	// root node
-	var strBuilder strings.Builder
-	err := recursiveHeaderEncoding(node, &strBuilder)
+	writer := CreateBitWriter()
+	err := recursiveHeaderEncoding(node, &writer)
+	// stop here
+	writer.writeRune(PseudoEOF)
+	writer.WriteBytes()
+
 	if err != nil {
 		return nil, err
 	}
-	data := strBuilder.String()
-	return &data, nil
+	return writer.Bytes(), nil
 }
 
-func recursiveHeaderEncoding(node *HuffmanTreeNode, builder *strings.Builder) error {
+func recursiveHeaderEncoding(node *HuffmanTreeNode, writer *BitWriter) error {
 	var err error
 	if node == nil {
 		return fmt.Errorf("error nil pointer given for header encoding")
 	}
 
 	if node.IsLeaf {
-		builder.WriteRune('1')
-		builder.WriteRune(node.Char)
+		writer.writeBitFromBool(true)
+		writer.writeRune(node.Char)
 	} else {
-		builder.WriteRune('0')
+		writer.writeBitFromBool(false)
 	}
 
 	if node.Left != nil {
-		err = recursiveHeaderEncoding(node.Left, builder)
+		err = recursiveHeaderEncoding(node.Left, writer)
 	}
 
 	if node.Right != nil {
-		err = recursiveHeaderEncoding(node.Right, builder)
+		err = recursiveHeaderEncoding(node.Right, writer)
 	}
 
 	return err
