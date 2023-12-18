@@ -8,16 +8,10 @@ import (
 
 func getDecodedText(root *HuffmanTreeNode, filename string) (*string, error) {
 	fileBytes, err := os.ReadFile(filename)
-	if err != nil {
-		return nil, err
-	}
 
-	res := fmt.Sprintf("%08b", fileBytes)
-	res = strings.TrimFunc(res, func(r rune) bool {
-		return r == '[' || r == ']'
-	})
-	res = strings.Join(strings.Fields(res), "")
-	text, err := decodeText(root, res)
+	bitReader := CreateBitReader(fileBytes)
+
+	text, err := decodeText(root, &bitReader)
 
 	if err != nil {
 		return nil, err
@@ -25,15 +19,15 @@ func getDecodedText(root *HuffmanTreeNode, filename string) (*string, error) {
 	return &text, nil
 }
 
-func decodeText(node *HuffmanTreeNode, code string) (string, error) {
+func decodeText(node *HuffmanTreeNode, bitReader *BitReader) (string, error) {
 	var strBuilder strings.Builder
 	temp := node
 
-	for _, val := range code {
-		switch val {
-		case '0':
+	for bitReader.HasNext() {
+		switch bitReader.GetNextBit() {
+		case false:
 			temp = temp.Left
-		case '1':
+		case true:
 			temp = temp.Right
 		default:
 			return "", fmt.Errorf("something went wrong, input != (0 || 1)")
