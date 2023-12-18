@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"container/heap"
 	"fmt"
-	"log"
+	"io"
 	"os"
 )
 
@@ -152,17 +152,17 @@ func getHuffmanTreeFromFrequencies(charFrequencies map[rune]uint64) *HuffmanTree
 	return root
 }
 
-func getHuffmanTreeFromFile(filename string) *HuffmanTreeNode {
-	file := readFile(filename)
+func getHuffmanTreeFromFile(file *os.File) (*HuffmanTreeNode, error) {
+	_, err := file.Seek(0, io.SeekStart)
 
-	defer func(file *os.File) {
-		_ = file.Close()
-	}(file)
+	if err != nil {
+		return nil, err
+	}
 
 	charFrequencies, err := CalculateFrequencies(bufio.NewReader(file))
 
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	AddPseudoEOF(charFrequencies)
@@ -171,5 +171,5 @@ func getHuffmanTreeFromFile(filename string) *HuffmanTreeNode {
 
 	root := BuildHuffmanTree(priorityQueue)
 
-	return root
+	return root, nil
 }

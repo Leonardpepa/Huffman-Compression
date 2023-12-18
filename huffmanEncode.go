@@ -48,6 +48,7 @@ func createBits(file *os.File, table map[rune]string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	compressedString := *data
 	arrayOfBytes := make([]byte, 0)
 	count := 0

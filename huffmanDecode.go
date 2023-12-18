@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strings"
 )
@@ -21,7 +20,7 @@ func getDecodedText(root *HuffmanTreeNode, filename string) (*string, error) {
 	text, err := decodeText(root, res)
 
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	return &text, nil
 }

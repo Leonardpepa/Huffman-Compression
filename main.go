@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 )
@@ -19,12 +20,33 @@ func main() {
 	//
 	//root := getHuffmanTreeFromFrequencies(charFrequencies)
 
-	root := getHuffmanTreeFromFile("input/gutenberg.txt")
+	file := readFile("input/gutenberg.txt")
 
-	calculateCodeForEachChar(root)
+	root, err := getHuffmanTreeFromFile(file)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	table := calculateCodeForEachChar(root)
 
 	TraverseTree(root)
 
+	//without header
+	encodedData, err := createBits(file, table)
+	if err != nil {
+		return
+	}
+
+	output := "output/encoded.hf"
+	_ = os.WriteFile(output, encodedData, 0666)
+
+	text, err := getDecodedText(root, output)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(*text)
 }
 
 // TODO create cli api
