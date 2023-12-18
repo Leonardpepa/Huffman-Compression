@@ -72,9 +72,8 @@ func createBits(file *os.File, table map[rune]string) ([]byte, error) {
 		bitWriter.writeBitFromChar(value)
 	}
 
-	if bitWriter.HasRemainingBits() {
-		bitWriter.WriteRemainingBitsWithPadding()
-	}
+	// finish the writing
+	bitWriter.WriteBytes()
 
 	return bitWriter.Bytes(), nil
 }

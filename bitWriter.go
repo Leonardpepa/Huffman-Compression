@@ -72,6 +72,10 @@ func (writer *BitWriter) writeRune(char rune) {
 		writer.writeBitFromBool(bit)
 	}
 
+	writer.WriteBytes()
+}
+
+func (writer *BitWriter) WriteBytes() {
 	if writer.HasRemainingBits() {
 		writer.WriteRemainingBitsWithPadding()
 	}
