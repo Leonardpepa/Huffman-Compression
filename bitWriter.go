@@ -1,6 +1,8 @@
 package main
 
-import "log"
+import (
+	"log"
+)
 
 type BitWriter struct {
 	data    []byte
@@ -38,9 +40,7 @@ func (writer *BitWriter) writeBitFromChar(bit rune) {
 	writer.count++
 
 	if writer.count == 8 {
-		writer.data = append(writer.data, writer.current)
-		writer.current = byte(0)
-		writer.count = 0
+		writer.appendByte()
 	}
 }
 
@@ -55,9 +55,25 @@ func (writer *BitWriter) writeBitFromBool(bit bool) {
 	writer.count++
 
 	if writer.count == 8 {
-		writer.data = append(writer.data, writer.current)
-		writer.current = byte(0)
-		writer.count = 0
+		writer.appendByte()
+	}
+}
+func (writer *BitWriter) appendByte() {
+	writer.data = append(writer.data, writer.current)
+	writer.current = byte(0)
+	writer.count = 0
+}
+
+func (writer *BitWriter) writeRune(char rune) {
+	bitReader := CreateBitReader([]byte(string(char)))
+
+	for bitReader.HasNext() {
+		bit := bitReader.Read()
+		writer.writeBitFromBool(bit)
+	}
+
+	if writer.HasRemainingBits() {
+		writer.WriteRemainingBitsWithPadding()
 	}
 }
 
@@ -66,7 +82,7 @@ func (writer *BitWriter) HasRemainingBits() bool {
 }
 
 func (writer *BitWriter) WriteRemainingBitsWithPadding() {
-	writer.data = append(writer.data, writer.current)
+	writer.data = append(writer.data, writer.current<<(8-writer.count))
 	writer.current = byte(0)
 	writer.count = 0
 }

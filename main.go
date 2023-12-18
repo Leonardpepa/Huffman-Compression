@@ -7,18 +7,18 @@ import (
 )
 
 func main() {
-	//charFrequencies := map[rune]uint64{
-	//	'Z': 2,
-	//	'K': 7,
-	//	'M': 24,
-	//	'C': 32,
-	//	'U': 37,
-	//	'D': 42,
-	//	'L': 42,
-	//	'E': 120,
-	//}
-	//
-	//root := getHuffmanTreeFromFrequencies(charFrequencies)
+	charFrequencies := map[rune]uint64{
+		'Z': 2,
+		'K': 7,
+		'M': 24,
+		'C': 32,
+		'U': 37,
+		'D': 42,
+		'L': 42,
+		'E': 120,
+	}
+
+	root := getHuffmanTreeFromFrequencies(charFrequencies)
 
 	file := readFile("input/gutenberg.txt")
 
@@ -47,6 +47,7 @@ func main() {
 	}
 
 	fmt.Println(*text)
+
 }
 
 // TODO create cli api
