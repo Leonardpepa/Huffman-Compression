@@ -5,7 +5,7 @@ import (
 	"io"
 )
 
-var PseudoEOF = '\U0000FDEF'
+var PseudoEOF = rune(256)
 
 func CalculateFrequencies(reader *bufio.Reader) (map[rune]uint64, error) {
 
@@ -25,5 +25,9 @@ func CalculateFrequencies(reader *bufio.Reader) (map[rune]uint64, error) {
 }
 
 func AddPseudoEOF(frequencies map[rune]uint64) {
+	for _, ok := frequencies[PseudoEOF]; ok; {
+		PseudoEOF++
+	}
 	frequencies[PseudoEOF] = 0
+
 }
