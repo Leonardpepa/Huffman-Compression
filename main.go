@@ -19,8 +19,8 @@ func main() {
 	}
 
 	root := getHuffmanTreeFromFrequencies(charFrequencies)
-
-	file := readFile("input/gutenberg.txt")
+	input := "gutenberg"
+	file := readFile("input/" + input + ".txt")
 
 	root, err := getHuffmanTreeFromFile(file)
 
@@ -38,7 +38,7 @@ func main() {
 		return
 	}
 
-	output := "output/encoded.hf"
+	output := "output/" + input + ".hf"
 	_ = os.WriteFile(output, encodedData, 0666)
 
 	text, err := getDecodedText(root, output)
