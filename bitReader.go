@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"unicode/utf8"
 )
 
 type BitReader struct {
@@ -64,4 +65,56 @@ func (reader *BitReader) Read() bool {
 	}
 
 	return bit
+}
+
+func (reader *BitReader) ReadChar() rune {
+
+	byte1 := reader.readByte()
+
+	//0xxxxxxx
+	if reader.getBitAsBool(byte1, 7) == false {
+		r, _ := utf8.DecodeRune([]byte{byte1})
+		return r
+	}
+
+	// 110xxxxx 10xxxxxx
+	if reader.getBitAsBool(byte1, 7) &&
+		reader.getBitAsBool(byte1, 6) &&
+		reader.getBitAsBool(byte1, 5) == false {
+		byte2 := reader.readByte()
+
+		r, _ := utf8.DecodeRune([]byte{byte1, byte2})
+		return r
+
+	}
+
+	// 1110xxxx 10xxxxxx 10xxxxxx
+	if reader.getBitAsBool(byte1, 7) &&
+		reader.getBitAsBool(byte1, 6) &&
+		reader.getBitAsBool(byte1, 5) &&
+		reader.getBitAsBool(byte1, 4) == false {
+		byte2 := reader.readByte()
+		byte3 := reader.readByte()
+
+		r, _ := utf8.DecodeRune([]byte{byte1, byte2, byte3})
+		return r
+
+	}
+
+	log.Fatal("Error while decoding utf8 rune")
+	return 0
+}
+
+func (reader *BitReader) readByte() byte {
+	writer := CreateBitWriter()
+	for reader.HasNext() {
+		bit := reader.Read()
+		writer.writeBitFromBool(bit)
+
+		if writer.Size() == 1 {
+			break
+		}
+	}
+
+	return writer.Bytes()[0]
 }

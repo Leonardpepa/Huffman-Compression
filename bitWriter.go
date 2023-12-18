@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"unicode/utf8"
 )
 
 type BitWriter struct {
@@ -65,7 +66,10 @@ func (writer *BitWriter) appendByte() {
 }
 
 func (writer *BitWriter) writeRune(char rune) {
-	bitReader := CreateBitReader([]byte(string(char)))
+	b := make([]byte, utf8.RuneLen(char))
+	utf8.EncodeRune(b, char)
+
+	bitReader := CreateBitReader(b)
 
 	for bitReader.HasNext() {
 		bit := bitReader.Read()

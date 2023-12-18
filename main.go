@@ -19,7 +19,7 @@ func main() {
 	}
 
 	root := getHuffmanTreeFromFrequencies(charFrequencies)
-	input := "gutenberg"
+	input := "hamlet"
 	file := readFile("input/" + input + ".txt")
 
 	root, err := getHuffmanTreeFromFile(file)
