@@ -7,18 +7,19 @@ import (
 )
 
 func main() {
-	charFrequencies := map[rune]uint64{
-		'Z': 2,
-		'K': 7,
-		'M': 24,
-		'C': 32,
-		'U': 37,
-		'D': 42,
-		'L': 42,
-		'E': 120,
-	}
+	//charFrequencies := map[rune]uint64{
+	//	'Z': 2,
+	//	'K': 7,
+	//	'M': 24,
+	//	'C': 32,
+	//	'U': 37,
+	//	'D': 42,
+	//	'L': 42,
+	//	'E': 120,
+	//}
+	//
+	//root := getHuffmanTreeFromFrequencies(charFrequencies)
 
-	root := getHuffmanTreeFromFrequencies(charFrequencies)
 	input := "hamlet"
 	file := readFile("input/" + input + ".txt")
 
