@@ -31,25 +31,51 @@ func main() {
 		log.Fatal(err)
 	}
 
-	table := calculateCodeForEachChar(root)
+	calculateCodeForEachChar(root)
 
 	TraverseTree(root)
 
-	////without header
-	encodedData, err := createBits(file, table)
-	if err != nil {
-		return
-	}
+	//////without header
+	//encodedData, err := createBits(file, table)
+	//if err != nil {
+	//	return
+	//}
+	//
+	//output := "output/" + input + ".hf"
+	//_ = os.WriteFile(output, encodedData, 0666)
+	//
+	//text, err := getDecodedText(root, output)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//
+	//fmt.Println(*text)
 
-	output := "output/" + input + ".hf"
-	_ = os.WriteFile(output, encodedData, 0666)
-
-	text, err := getDecodedText(root, output)
+	information, size, err := encodeHuffmanHeaderInformation(root, PreOrder)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println(*text)
+	reader := CreateBitReader(information)
+
+	createTreeFromHeader(&reader, size)
+}
+
+func createTreeFromHeader(reader *BitReader, size int) {
+	count := 0
+	for count < size && reader.HasNext() {
+		bit := reader.Read()
+		switch bit {
+		case true:
+			c := reader.ReadChar()
+			fmt.Print(1)
+			fmt.Printf("%c", c)
+			count++
+		case false:
+			fmt.Print(0)
+		}
+		count++
+	}
 }
 
 // TODO create cli api

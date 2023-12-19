@@ -7,24 +7,72 @@ import (
 	"os"
 )
 
-func encodeHuffmanHeaderInformation(node *HuffmanTreeNode) ([]byte, error) {
+const (
+	PreOrder = iota
+	PostOrder
+	InOrder
+)
+
+func encodeHuffmanHeaderInformation(node *HuffmanTreeNode, encodeType int) ([]byte, int, error) {
+	var err error
 	// root node
 	writer := CreateBitWriter()
-	err := recursiveHeaderEncoding(node, &writer)
+	count := 0
+	switch encodeType {
+	case PreOrder:
+		err = recursivePreOrderHeaderEncoding(node, &writer, &count)
+	case PostOrder:
+		err = recursivePostOrderHeaderEncoding(node, &writer)
+	case InOrder:
+		err = recursiveInOrderHeaderEncoding(node, &writer)
+	}
 	// stop here
-	writer.writeRune(PseudoEOF)
 	writer.WriteBytes()
 
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return writer.Bytes(), nil
+	return writer.Bytes(), count, nil
 }
 
-func recursiveHeaderEncoding(node *HuffmanTreeNode, writer *BitWriter) error {
+func recursivePreOrderHeaderEncoding(node *HuffmanTreeNode, writer *BitWriter, count *int) error {
 	var err error
 	if node == nil {
 		return fmt.Errorf("error nil pointer given for header encoding")
+	}
+
+	if node.IsLeaf {
+		writer.writeBitFromBool(true)
+		writer.writeRune(node.Char)
+		*count = *count + 2
+	} else {
+		writer.writeBitFromBool(false)
+		*count = *count + 1
+	}
+
+	if node.Left != nil {
+		err = recursivePreOrderHeaderEncoding(node.Left, writer, count)
+	}
+
+	if node.Right != nil {
+		err = recursivePreOrderHeaderEncoding(node.Right, writer, count)
+	}
+
+	return err
+}
+
+func recursivePostOrderHeaderEncoding(node *HuffmanTreeNode, writer *BitWriter) error {
+	var err error
+	if node == nil {
+		return fmt.Errorf("error nil pointer given for header encoding")
+	}
+
+	if node.Left != nil {
+		err = recursivePostOrderHeaderEncoding(node.Left, writer)
+	}
+
+	if node.Right != nil {
+		err = recursivePostOrderHeaderEncoding(node.Right, writer)
 	}
 
 	if node.IsLeaf {
@@ -34,12 +82,27 @@ func recursiveHeaderEncoding(node *HuffmanTreeNode, writer *BitWriter) error {
 		writer.writeBitFromBool(false)
 	}
 
-	if node.Left != nil {
-		err = recursiveHeaderEncoding(node.Left, writer)
+	return err
+}
+
+func recursiveInOrderHeaderEncoding(node *HuffmanTreeNode, writer *BitWriter) error {
+	var err error
+	if node == nil {
+		return fmt.Errorf("error nil pointer given for header encoding")
 	}
 
+	if node.Left != nil {
+		err = recursiveInOrderHeaderEncoding(node.Left, writer)
+	}
+
+	if node.IsLeaf {
+		writer.writeBitFromBool(true)
+		writer.writeRune(node.Char)
+	} else {
+		writer.writeBitFromBool(false)
+	}
 	if node.Right != nil {
-		err = recursiveHeaderEncoding(node.Right, writer)
+		err = recursiveInOrderHeaderEncoding(node.Right, writer)
 	}
 
 	return err
