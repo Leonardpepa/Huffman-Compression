@@ -22,7 +22,7 @@ func main() {
 	//
 	//root := getHuffmanTreeFromFrequencies(charFrequencies)
 
-	input := "hamlet"
+	input := "gogo"
 	file := readFile("input/" + input + ".txt")
 
 	root, err := getHuffmanTreeFromFile(file)
@@ -31,51 +31,35 @@ func main() {
 		log.Fatal(err)
 	}
 
-	calculateCodeForEachChar(root)
+	table := calculateCodeForEachChar(root)
 
 	TraverseTree(root)
 
-	//////without header
-	//encodedData, err := createBits(file, table)
-	//if err != nil {
-	//	return
-	//}
-	//
-	//output := "output/" + input + ".hf"
-	//_ = os.WriteFile(output, encodedData, 0666)
-	//
-	//text, err := getDecodedText(root, output)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//
-	//fmt.Println(*text)
+	//without header
+	encodedData, err := createBits(file, table)
+	if err != nil {
+		return
+	}
 
-	information, size, err := encodeHuffmanHeaderInformation(root, PostOrder)
+	output := "output/" + input + ".hf"
+	_ = os.WriteFile(output, encodedData, 0666)
+
+	information, size, err := encodeHuffmanHeaderInformation(root, PreOrder)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	reader := CreateBitReader(information)
 
-	createTreeFromHeader(&reader, size)
-}
+	rootFromHeader := CreateTreeFromHeader(&reader, size)
+	text, err := getDecodedText(rootFromHeader, output)
 
-func createTreeFromHeader(reader *BitReader, size int) {
-	count := 0
-	for count < size && reader.HasNext() {
-		bit := reader.Read()
-		switch bit {
-		case true:
-			c := reader.ReadChar()
-			fmt.Print(1)
-			fmt.Printf("%c", c)
-			count++
-		case false:
-			fmt.Print(0)
-		}
-		count++
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	fmt.Println(*text)
+
 }
 
 // TODO create cli api

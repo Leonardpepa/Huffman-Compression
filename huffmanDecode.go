@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strings"
 )
@@ -48,4 +49,70 @@ func decodeText(node *HuffmanTreeNode, bitReader *BitReader) (string, error) {
 
 	}
 	return strBuilder.String(), nil
+}
+
+func CreateTreeFromHeader(reader *BitReader, size int) *HuffmanTreeNode {
+	var root *HuffmanTreeNode
+	var current *HuffmanTreeNode
+
+	count := 0
+	for count < size && reader.HasNext() {
+		bit := reader.Read()
+		switch bit {
+		case true:
+			count += 2
+			c := reader.ReadChar()
+			current = backtrack(current)
+			createLeafNode(current, c)
+
+		case false:
+			count++
+			if current == nil {
+				root = &HuffmanTreeNode{}
+				current = root
+				continue
+			}
+
+			current = backtrack(current)
+			current = createInternalNode(current)
+		}
+	}
+
+	return root
+}
+
+func createInternalNode(current *HuffmanTreeNode) *HuffmanTreeNode {
+	if current.Left == nil {
+		temp := &HuffmanTreeNode{Parent: current}
+		current.Left = temp
+		current = current.Left
+	} else if current.Right == nil {
+		temp := &HuffmanTreeNode{Parent: current}
+		current.Right = temp
+		current = current.Right
+	} else {
+		log.Fatal("error while creating internal node")
+	}
+
+	return current
+}
+
+func createLeafNode(current *HuffmanTreeNode, c rune) {
+	if current.Left == nil {
+		temp := &HuffmanTreeNode{Parent: current, IsLeaf: true, Char: c}
+		current.Left = temp
+	} else if current.Right == nil {
+		temp := &HuffmanTreeNode{Parent: current, IsLeaf: true, Char: c}
+		current.Right = temp
+	}
+}
+
+func backtrack(current *HuffmanTreeNode) *HuffmanTreeNode {
+	for current.Left != nil && current.Right != nil {
+		if current.Parent == nil {
+			log.Fatal("Error while decoding tree, nil pointer")
+		}
+		current = current.Parent
+	}
+	return current
 }
