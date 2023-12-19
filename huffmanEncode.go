@@ -22,9 +22,9 @@ func encodeHuffmanHeaderInformation(node *HuffmanTreeNode, encodeType int) ([]by
 	case PreOrder:
 		err = recursivePreOrderHeaderEncoding(node, &writer, &count)
 	case PostOrder:
-		err = recursivePostOrderHeaderEncoding(node, &writer)
+		err = recursivePostOrderHeaderEncoding(node, &writer, &count)
 	case InOrder:
-		err = recursiveInOrderHeaderEncoding(node, &writer)
+		err = recursiveInOrderHeaderEncoding(node, &writer, &count)
 	}
 	// stop here
 	writer.WriteBytes()
@@ -61,48 +61,52 @@ func recursivePreOrderHeaderEncoding(node *HuffmanTreeNode, writer *BitWriter, c
 	return err
 }
 
-func recursivePostOrderHeaderEncoding(node *HuffmanTreeNode, writer *BitWriter) error {
+func recursivePostOrderHeaderEncoding(node *HuffmanTreeNode, writer *BitWriter, count *int) error {
 	var err error
 	if node == nil {
 		return fmt.Errorf("error nil pointer given for header encoding")
 	}
 
 	if node.Left != nil {
-		err = recursivePostOrderHeaderEncoding(node.Left, writer)
+		err = recursivePostOrderHeaderEncoding(node.Left, writer, count)
 	}
 
 	if node.Right != nil {
-		err = recursivePostOrderHeaderEncoding(node.Right, writer)
+		err = recursivePostOrderHeaderEncoding(node.Right, writer, count)
 	}
 
 	if node.IsLeaf {
 		writer.writeBitFromBool(true)
 		writer.writeRune(node.Char)
+		*count = *count + 2
 	} else {
 		writer.writeBitFromBool(false)
+		*count = *count + 1
 	}
 
 	return err
 }
 
-func recursiveInOrderHeaderEncoding(node *HuffmanTreeNode, writer *BitWriter) error {
+func recursiveInOrderHeaderEncoding(node *HuffmanTreeNode, writer *BitWriter, count *int) error {
 	var err error
 	if node == nil {
 		return fmt.Errorf("error nil pointer given for header encoding")
 	}
 
 	if node.Left != nil {
-		err = recursiveInOrderHeaderEncoding(node.Left, writer)
+		err = recursiveInOrderHeaderEncoding(node.Left, writer, count)
 	}
 
 	if node.IsLeaf {
 		writer.writeBitFromBool(true)
 		writer.writeRune(node.Char)
+		*count = *count + 2
 	} else {
 		writer.writeBitFromBool(false)
+		*count = *count + 1
 	}
 	if node.Right != nil {
-		err = recursiveInOrderHeaderEncoding(node.Right, writer)
+		err = recursiveInOrderHeaderEncoding(node.Right, writer, count)
 	}
 
 	return err

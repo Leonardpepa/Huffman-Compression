@@ -51,7 +51,7 @@ func main() {
 	//
 	//fmt.Println(*text)
 
-	information, size, err := encodeHuffmanHeaderInformation(root, PreOrder)
+	information, size, err := encodeHuffmanHeaderInformation(root, PostOrder)
 	if err != nil {
 		log.Fatal(err)
 	}
