@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"unicode/utf8"
 )
 
 const (
@@ -13,26 +14,70 @@ const (
 	InOrder
 )
 
-func encodeHuffmanHeaderInformation(node *HuffmanTreeNode, encodeType int) ([]byte, int, error) {
+func Encode(file *os.File, output string) error {
+	root, err := CreateHuffmanTreeFromFile(file)
+
+	if err != nil {
+		return err
+	}
+
+	table := calculateCodeForEachChar(root)
+
+	bitWriter := CreateBitWriter()
+
+	size, err := encodeHuffmanHeaderInformation(root, PreOrder, &bitWriter)
+
+	if err != nil {
+		return err
+	}
+
+	err = createBits(file, &bitWriter, table)
+
+	if err != nil {
+		return err
+	}
+
+	bitWriter.WriteBytes()
+
+	sizeRune := rune(size)
+
+	b := make([]byte, utf8.RuneLen(sizeRune))
+	utf8.EncodeRune(b, sizeRune)
+
+	data := make([]byte, 0)
+
+	data = append(data, b...)
+	data = append(data, bitWriter.Bytes()...)
+
+	err = os.WriteFile(output, data, 0666)
+
+	if err != nil {
+		return err
+	}
+
+	// finish writing bits
+	return nil
+}
+
+func encodeHuffmanHeaderInformation(node *HuffmanTreeNode, encodeType int, writer *BitWriter) (int, error) {
 	var err error
 	// root node
-	writer := CreateBitWriter()
 	count := 0
 	switch encodeType {
 	case PreOrder:
-		err = recursivePreOrderHeaderEncoding(node, &writer, &count)
+		err = recursivePreOrderHeaderEncoding(node, writer, &count)
 	case PostOrder:
-		err = recursivePostOrderHeaderEncoding(node, &writer, &count)
+		err = recursivePostOrderHeaderEncoding(node, writer, &count)
 	case InOrder:
-		err = recursiveInOrderHeaderEncoding(node, &writer, &count)
+		err = recursiveInOrderHeaderEncoding(node, writer, &count)
 	}
-	// stop here
-	writer.WriteBytes()
+	//// stop here
+	//writer.WriteBytes()
 
 	if err != nil {
-		return nil, 0, err
+		return 0, err
 	}
-	return writer.Bytes(), count, nil
+	return count, nil
 }
 
 func recursivePreOrderHeaderEncoding(node *HuffmanTreeNode, writer *BitWriter, count *int) error {
@@ -112,14 +157,13 @@ func recursiveInOrderHeaderEncoding(node *HuffmanTreeNode, writer *BitWriter, co
 	return err
 }
 
-func createBits(file *os.File, table map[rune]string) ([]byte, error) {
+func createBits(file *os.File, bitWriter *BitWriter, table map[rune]string) error {
 	_, err := file.Seek(0, io.SeekStart)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	reader := bufio.NewReader(file)
-	bitWriter := CreateBitWriter()
 
 	for {
 		r, _, err := reader.ReadRune()
@@ -128,7 +172,7 @@ func createBits(file *os.File, table map[rune]string) ([]byte, error) {
 			if err == io.EOF {
 				break
 			}
-			return nil, err
+			return err
 		}
 
 		for _, value := range table[r] {
@@ -141,8 +185,8 @@ func createBits(file *os.File, table map[rune]string) ([]byte, error) {
 		bitWriter.writeBitFromChar(value)
 	}
 
-	// finish the writing
-	bitWriter.WriteBytes()
+	//// finish the writing
+	//bitWriter.WriteBytes()
 
-	return bitWriter.Bytes(), nil
+	return nil
 }

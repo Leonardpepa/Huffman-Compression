@@ -144,7 +144,7 @@ func calculateCode(node *HuffmanTreeNode, table map[rune]string, c string) {
 	}
 }
 
-func getHuffmanTreeFromFrequencies(charFrequencies map[rune]uint64) *HuffmanTreeNode {
+func createHuffmanTreeFromFrequencies(charFrequencies map[rune]uint64) *HuffmanTreeNode {
 	priorityQueue := CreatePriorityQueue(charFrequencies)
 
 	root := BuildHuffmanTree(priorityQueue)
@@ -152,7 +152,7 @@ func getHuffmanTreeFromFrequencies(charFrequencies map[rune]uint64) *HuffmanTree
 	return root
 }
 
-func getHuffmanTreeFromFile(file *os.File) (*HuffmanTreeNode, error) {
+func CreateHuffmanTreeFromFile(file *os.File) (*HuffmanTreeNode, error) {
 	_, err := file.Seek(0, io.SeekStart)
 
 	if err != nil {

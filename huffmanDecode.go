@@ -1,18 +1,40 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"strings"
 )
 
-func getDecodedText(root *HuffmanTreeNode, filename string) (*string, error) {
-	fileBytes, err := os.ReadFile(filename)
+func Decode(file *os.File) error {
+	data, err := io.ReadAll(bufio.NewReader(file))
 
-	bitReader := CreateBitReader(fileBytes)
+	if err != nil {
+		return err
+	}
 
-	text, err := decodeText(root, &bitReader)
+	bitReader := CreateBitReader(data)
+	size := int(bitReader.ReadChar())
+
+	root := CreateTreeFromHeader(&bitReader, size)
+
+	TraverseTree(root)
+
+	text, err := getDecodedText(root, &bitReader)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(*text)
+	return nil
+}
+
+func getDecodedText(root *HuffmanTreeNode, bitReader *BitReader) (*string, error) {
+
+	text, err := decodeText(root, bitReader)
 
 	if err != nil {
 		return nil, err
