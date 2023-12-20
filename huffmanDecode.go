@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func Decode(file *os.File) error {
+func Decode(file *os.File, output string) error {
 	data, err := io.ReadAll(bufio.NewReader(file))
 
 	if err != nil {
@@ -21,14 +21,16 @@ func Decode(file *os.File) error {
 
 	root := CreateTreeFromHeader(&bitReader, size)
 
-	TraverseTree(root)
-
 	text, err := getDecodedText(root, &bitReader)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println(*text)
+	err = os.WriteFile(output, []byte(*text), 0666)
+
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

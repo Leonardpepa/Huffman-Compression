@@ -1,27 +1,67 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 )
 
 func main() {
-	file := readFile("input/gutenberg.txt")
-	err := Encode(file, "output.hf")
-	if err != nil {
-		log.Fatal(err)
+
+	c := flag.Bool("c", false, "Specify a file to compress")
+	d := flag.Bool("d", false, "Specify a file to decompress")
+
+	flag.Parse()
+
+	if *c == false && *d == false {
+		log.Fatal(`
+	Usage: huffman.exe [OPTIONS]... [FILE] ~1 file
+	[OPTIONS]:
+	-c FILE ~file to compress
+	-d FILE ~file to decompress
+`)
 	}
 
-	file = readFile("output.hf")
-	err = Decode(file)
-
-	if err != nil {
-		log.Fatal(err)
+	if *c && *d {
+		log.Fatal(`
+	
+	Usage: huffman.exe [OPTIONS]... [FILE] ~1 file
+	[OPTIONS]:
+	-c FILE ~file to compress
+	-d FILE ~file to decompress
+`)
 	}
+
+	if len(flag.Args()) != 1 {
+		log.Fatal(`
+	Usage: huffman.exe [OPTIONS]... [FILE]
+	[OPTIONS]:
+	-c FILE ~file to compress
+	-d FILE ~file to decompress
+`)
+	}
+
+	if *c {
+		file := openFile(flag.Args()[0])
+
+		err := Encode(file, "output.hf")
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+	} else if *d {
+		file := openFile(flag.Args()[0])
+		err := Decode(file, "decode.txt")
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 }
 
 // TODO create cli api
-func readFile(filename string) *os.File {
+func openFile(filename string) *os.File {
 	file, err := os.Open(filename)
 
 	if err != nil {
