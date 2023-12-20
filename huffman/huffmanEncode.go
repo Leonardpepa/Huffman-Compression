@@ -1,8 +1,9 @@
-package main
+package huffman
 
 import (
 	"bufio"
 	"fmt"
+	"huffmanCompression/bitstream"
 	"io"
 	"log"
 	"os"
@@ -15,6 +16,8 @@ const (
 	InOrder
 )
 
+var PseudoEOF = rune(256)
+
 func Encode(file *os.File, output string) error {
 	log.Println("Creating huffman tree... ")
 	root, err := CreateHuffmanTreeFromFile(file)
@@ -24,9 +27,9 @@ func Encode(file *os.File, output string) error {
 	}
 
 	log.Println("Calculating variable length codes... ")
-	table := calculateCodeForEachChar(root)
+	table := CalculateCodeForEachChar(root)
 
-	bitWriter := CreateBitWriter()
+	bitWriter := bitstream.CreateBitWriter()
 
 	log.Println("Encoding the tree in the header... ")
 	size, err := encodeHuffmanHeaderInformation(root, PreOrder, &bitWriter)
@@ -35,7 +38,7 @@ func Encode(file *os.File, output string) error {
 		return err
 	}
 
-	log.Println("Encoding the data bit by bit... ")
+	log.Println("Encoding the data bitstream by bitstream... ")
 	err = createBits(file, &bitWriter, table)
 
 	if err != nil {
@@ -64,7 +67,7 @@ func Encode(file *os.File, output string) error {
 	return nil
 }
 
-func encodeHuffmanHeaderInformation(node *HuffmanTreeNode, encodeType int, writer *BitWriter) (int, error) {
+func encodeHuffmanHeaderInformation(node *HuffmanTreeNode, encodeType int, writer *bitstream.Writer) (int, error) {
 	var err error
 	// root node
 	count := 0
@@ -85,18 +88,18 @@ func encodeHuffmanHeaderInformation(node *HuffmanTreeNode, encodeType int, write
 	return count, nil
 }
 
-func recursivePreOrderHeaderEncoding(node *HuffmanTreeNode, writer *BitWriter, count *int) error {
+func recursivePreOrderHeaderEncoding(node *HuffmanTreeNode, writer *bitstream.Writer, count *int) error {
 	var err error
 	if node == nil {
 		return fmt.Errorf("error nil pointer given for header encoding")
 	}
 
 	if node.IsLeaf {
-		writer.writeBitFromBool(true)
-		writer.writeRune(node.Char)
+		writer.WriteBitFromBool(true)
+		writer.WriteRune(node.Char)
 		*count = *count + 2
 	} else {
-		writer.writeBitFromBool(false)
+		writer.WriteBitFromBool(false)
 		*count = *count + 1
 	}
 
@@ -111,7 +114,7 @@ func recursivePreOrderHeaderEncoding(node *HuffmanTreeNode, writer *BitWriter, c
 	return err
 }
 
-func recursivePostOrderHeaderEncoding(node *HuffmanTreeNode, writer *BitWriter, count *int) error {
+func recursivePostOrderHeaderEncoding(node *HuffmanTreeNode, writer *bitstream.Writer, count *int) error {
 	var err error
 	if node == nil {
 		return fmt.Errorf("error nil pointer given for header encoding")
@@ -126,18 +129,18 @@ func recursivePostOrderHeaderEncoding(node *HuffmanTreeNode, writer *BitWriter, 
 	}
 
 	if node.IsLeaf {
-		writer.writeBitFromBool(true)
-		writer.writeRune(node.Char)
+		writer.WriteBitFromBool(true)
+		writer.WriteRune(node.Char)
 		*count = *count + 2
 	} else {
-		writer.writeBitFromBool(false)
+		writer.WriteBitFromBool(false)
 		*count = *count + 1
 	}
 
 	return err
 }
 
-func recursiveInOrderHeaderEncoding(node *HuffmanTreeNode, writer *BitWriter, count *int) error {
+func recursiveInOrderHeaderEncoding(node *HuffmanTreeNode, writer *bitstream.Writer, count *int) error {
 	var err error
 	if node == nil {
 		return fmt.Errorf("error nil pointer given for header encoding")
@@ -148,11 +151,11 @@ func recursiveInOrderHeaderEncoding(node *HuffmanTreeNode, writer *BitWriter, co
 	}
 
 	if node.IsLeaf {
-		writer.writeBitFromBool(true)
-		writer.writeRune(node.Char)
+		writer.WriteBitFromBool(true)
+		writer.WriteRune(node.Char)
 		*count = *count + 2
 	} else {
-		writer.writeBitFromBool(false)
+		writer.WriteBitFromBool(false)
 		*count = *count + 1
 	}
 	if node.Right != nil {
@@ -162,7 +165,7 @@ func recursiveInOrderHeaderEncoding(node *HuffmanTreeNode, writer *BitWriter, co
 	return err
 }
 
-func createBits(file *os.File, bitWriter *BitWriter, table map[rune]string) error {
+func createBits(file *os.File, bitWriter *bitstream.Writer, table map[rune]string) error {
 	_, err := file.Seek(0, io.SeekStart)
 	if err != nil {
 		return err
@@ -181,17 +184,41 @@ func createBits(file *os.File, bitWriter *BitWriter, table map[rune]string) erro
 		}
 
 		for _, value := range table[r] {
-			bitWriter.writeBitFromChar(value)
+			bitWriter.WriteBitFromChar(value)
 		}
 	}
 
 	// Pseudo EOF
 	for _, value := range table[PseudoEOF] {
-		bitWriter.writeBitFromChar(value)
+		bitWriter.WriteBitFromChar(value)
 	}
 
 	//// finish the writing
 	//bitWriter.WriteBytes()
 
 	return nil
+}
+
+func calculateFrequencies(reader *bufio.Reader) (map[rune]uint64, error) {
+
+	frequencies := make(map[rune]uint64)
+	for {
+		char, _, err := reader.ReadRune()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			return nil, err
+		}
+
+		frequencies[char]++
+	}
+	return frequencies, nil
+}
+
+func AddPseudoEOF(frequencies map[rune]uint64) {
+	for _, ok := frequencies[PseudoEOF]; ok; {
+		PseudoEOF++
+	}
+	frequencies[PseudoEOF] = 0
 }

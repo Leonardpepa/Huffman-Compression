@@ -1,34 +1,34 @@
-package main
+package bitstream
 
 import (
 	"log"
 	"unicode/utf8"
 )
 
-type BitWriter struct {
+type Writer struct {
 	data    []byte
 	current byte
 	count   uint
 }
 
-func CreateBitWriter() BitWriter {
-	return BitWriter{
+func CreateBitWriter() Writer {
+	return Writer{
 		data: make([]byte, 0),
 	}
 }
 
-func (writer *BitWriter) Bytes() []byte {
+func (writer *Writer) Bytes() []byte {
 	return writer.data
 }
-func (writer *BitWriter) Size() int {
+func (writer *Writer) Size() int {
 	return len(writer.data)
 }
 
-func (writer *BitWriter) BitPosition() uint {
+func (writer *Writer) BitPosition() uint {
 	return writer.count
 }
 
-func (writer *BitWriter) writeBitFromChar(bit rune) {
+func (writer *Writer) WriteBitFromChar(bit rune) {
 	switch bit {
 	case '1':
 		writer.current = writer.current<<1 | 1
@@ -45,7 +45,7 @@ func (writer *BitWriter) writeBitFromChar(bit rune) {
 	}
 }
 
-func (writer *BitWriter) writeBitFromBool(bit bool) {
+func (writer *Writer) WriteBitFromBool(bit bool) {
 	switch bit {
 	case true:
 		writer.current = writer.current<<1 | 1
@@ -59,13 +59,13 @@ func (writer *BitWriter) writeBitFromBool(bit bool) {
 		writer.appendByte()
 	}
 }
-func (writer *BitWriter) appendByte() {
+func (writer *Writer) appendByte() {
 	writer.data = append(writer.data, writer.current)
 	writer.current = byte(0)
 	writer.count = 0
 }
 
-func (writer *BitWriter) writeRune(char rune) {
+func (writer *Writer) WriteRune(char rune) {
 	b := make([]byte, utf8.RuneLen(char))
 	utf8.EncodeRune(b, char)
 
@@ -73,21 +73,21 @@ func (writer *BitWriter) writeRune(char rune) {
 
 	for bitReader.HasNext() {
 		bit := bitReader.Read()
-		writer.writeBitFromBool(bit)
+		writer.WriteBitFromBool(bit)
 	}
 }
 
-func (writer *BitWriter) WriteBytes() {
+func (writer *Writer) WriteBytes() {
 	if writer.HasRemainingBits() {
-		writer.WriteRemainingBitsWithPadding()
+		writer.writeRemainingBitsWithPadding()
 	}
 }
 
-func (writer *BitWriter) HasRemainingBits() bool {
+func (writer *Writer) HasRemainingBits() bool {
 	return writer.count != 0 && writer.count%8 != 0
 }
 
-func (writer *BitWriter) WriteRemainingBitsWithPadding() {
+func (writer *Writer) writeRemainingBitsWithPadding() {
 	writer.data = append(writer.data, writer.current<<(8-writer.count))
 	writer.current = byte(0)
 	writer.count = 0

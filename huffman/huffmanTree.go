@@ -1,4 +1,4 @@
-package main
+package huffman
 
 import (
 	"bufio"
@@ -125,7 +125,7 @@ func TraverseTree(root *HuffmanTreeNode) {
 	}
 }
 
-func calculateCodeForEachChar(node *HuffmanTreeNode) map[rune]string {
+func CalculateCodeForEachChar(node *HuffmanTreeNode) map[rune]string {
 	table := make(map[rune]string)
 	calculateCode(node, table, "")
 	return table
@@ -144,7 +144,8 @@ func calculateCode(node *HuffmanTreeNode, table map[rune]string, c string) {
 	}
 }
 
-func createHuffmanTreeFromFrequencies(charFrequencies map[rune]uint64) *HuffmanTreeNode {
+func CreateHuffmanTreeFromFrequencies(charFrequencies map[rune]uint64) *HuffmanTreeNode {
+
 	priorityQueue := CreatePriorityQueue(charFrequencies)
 
 	root := BuildHuffmanTree(priorityQueue)
@@ -159,7 +160,7 @@ func CreateHuffmanTreeFromFile(file *os.File) (*HuffmanTreeNode, error) {
 		return nil, err
 	}
 
-	charFrequencies, err := CalculateFrequencies(bufio.NewReader(file))
+	charFrequencies, err := calculateFrequencies(bufio.NewReader(file))
 
 	if err != nil {
 		return nil, err

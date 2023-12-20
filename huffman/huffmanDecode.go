@@ -1,8 +1,9 @@
-package main
+package huffman
 
 import (
 	"bufio"
 	"fmt"
+	"huffmanCompression/bitstream"
 	"io"
 	"log"
 	"os"
@@ -17,11 +18,11 @@ func Decode(file *os.File, output string) error {
 		return err
 	}
 
-	bitReader := CreateBitReader(data)
+	bitReader := bitstream.CreateBitReader(data)
 	size := int(bitReader.ReadChar())
 
 	log.Println("Constructing the huffman tree from the header... ")
-	root := CreateTreeFromHeader(&bitReader, size)
+	root := createTreeFromHeader(&bitReader, size)
 
 	log.Println("Decoding the data... ")
 	text, err := getDecodedText(root, &bitReader)
@@ -39,7 +40,7 @@ func Decode(file *os.File, output string) error {
 	return nil
 }
 
-func getDecodedText(root *HuffmanTreeNode, bitReader *BitReader) (*string, error) {
+func getDecodedText(root *HuffmanTreeNode, bitReader *bitstream.Reader) (*string, error) {
 
 	text, err := decodeText(root, bitReader)
 
@@ -49,7 +50,7 @@ func getDecodedText(root *HuffmanTreeNode, bitReader *BitReader) (*string, error
 	return &text, nil
 }
 
-func decodeText(node *HuffmanTreeNode, bitReader *BitReader) (string, error) {
+func decodeText(node *HuffmanTreeNode, bitReader *bitstream.Reader) (string, error) {
 	var strBuilder strings.Builder
 	temp := node
 
@@ -80,7 +81,7 @@ func decodeText(node *HuffmanTreeNode, bitReader *BitReader) (string, error) {
 	return strBuilder.String(), nil
 }
 
-func CreateTreeFromHeader(reader *BitReader, size int) *HuffmanTreeNode {
+func createTreeFromHeader(reader *bitstream.Reader, size int) *HuffmanTreeNode {
 	var root *HuffmanTreeNode
 	var current *HuffmanTreeNode
 

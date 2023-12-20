@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"huffmanCompression/huffman"
 	"log"
 	"os"
 )
@@ -44,7 +45,7 @@ func main() {
 	if *c {
 		file := openFile(flag.Args()[0])
 
-		err := Encode(file, "output.hf")
+		err := huffman.Encode(file, "output.hf")
 
 		if err != nil {
 			log.Fatal(err)
@@ -52,7 +53,7 @@ func main() {
 
 	} else if *d {
 		file := openFile(flag.Args()[0])
-		err := Decode(file, "decoded.txt")
+		err := huffman.Decode(file, "decoded.txt")
 		if err != nil {
 			log.Fatal(err)
 		}

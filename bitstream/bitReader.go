@@ -1,42 +1,42 @@
-package main
+package bitstream
 
 import (
 	"log"
 	"unicode/utf8"
 )
 
-type BitReader struct {
+type Reader struct {
 	data   []byte
 	offset int
 	count  int
 	length int
 }
 
-func CreateBitReader(data []byte) BitReader {
-	return BitReader{data: data, length: len(data)}
+func CreateBitReader(data []byte) Reader {
+	return Reader{data: data, length: len(data)}
 }
 
-func (reader *BitReader) Bytes() []byte {
+func (reader *Reader) Bytes() []byte {
 	return reader.data
 }
 
-func (reader *BitReader) Size() int {
+func (reader *Reader) Size() int {
 	return reader.length
 }
 
-func (reader *BitReader) SizeOfBits() int {
+func (reader *Reader) SizeOfBits() int {
 	return reader.length * 8
 }
 
-func (reader *BitReader) Offset() int {
+func (reader *Reader) Offset() int {
 	return reader.offset
 }
 
-func (reader *BitReader) BitPosition() int {
+func (reader *Reader) BitPosition() int {
 	return reader.count
 }
 
-func (reader *BitReader) getBitAsBool(num byte, i int) bool {
+func (reader *Reader) getBitAsBool(num byte, i int) bool {
 	if i < 0 || i > 7 {
 		log.Fatal("Error index must be in bounds [0-7]")
 	}
@@ -47,11 +47,11 @@ func (reader *BitReader) getBitAsBool(num byte, i int) bool {
 	return true
 }
 
-func (reader *BitReader) HasNext() bool {
+func (reader *Reader) HasNext() bool {
 	return reader.offset < reader.length
 }
 
-func (reader *BitReader) Read() bool {
+func (reader *Reader) Read() bool {
 	if reader.HasNext() == false {
 		log.Fatal("No more bits to read. Abort")
 	}
@@ -67,9 +67,9 @@ func (reader *BitReader) Read() bool {
 	return bit
 }
 
-func (reader *BitReader) ReadChar() rune {
+func (reader *Reader) ReadChar() rune {
 
-	byte1 := reader.readByte()
+	byte1 := reader.ReadByte()
 
 	//0xxxxxxx
 	if reader.getBitAsBool(byte1, 7) == false {
@@ -81,7 +81,7 @@ func (reader *BitReader) ReadChar() rune {
 	if reader.getBitAsBool(byte1, 7) &&
 		reader.getBitAsBool(byte1, 6) &&
 		reader.getBitAsBool(byte1, 5) == false {
-		byte2 := reader.readByte()
+		byte2 := reader.ReadByte()
 
 		r, _ := utf8.DecodeRune([]byte{byte1, byte2})
 		return r
@@ -93,8 +93,8 @@ func (reader *BitReader) ReadChar() rune {
 		reader.getBitAsBool(byte1, 6) &&
 		reader.getBitAsBool(byte1, 5) &&
 		reader.getBitAsBool(byte1, 4) == false {
-		byte2 := reader.readByte()
-		byte3 := reader.readByte()
+		byte2 := reader.ReadByte()
+		byte3 := reader.ReadByte()
 
 		r, _ := utf8.DecodeRune([]byte{byte1, byte2, byte3})
 		return r
@@ -105,11 +105,11 @@ func (reader *BitReader) ReadChar() rune {
 	return 0
 }
 
-func (reader *BitReader) readByte() byte {
+func (reader *Reader) ReadByte() byte {
 	writer := CreateBitWriter()
 	for reader.HasNext() {
 		bit := reader.Read()
-		writer.writeBitFromBool(bit)
+		writer.WriteBitFromBool(bit)
 
 		if writer.Size() == 1 {
 			break
