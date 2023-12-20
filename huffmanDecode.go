@@ -10,6 +10,7 @@ import (
 )
 
 func Decode(file *os.File, output string) error {
+	log.Println("Reading encoded data... ")
 	data, err := io.ReadAll(bufio.NewReader(file))
 
 	if err != nil {
@@ -19,8 +20,10 @@ func Decode(file *os.File, output string) error {
 	bitReader := CreateBitReader(data)
 	size := int(bitReader.ReadChar())
 
+	log.Println("Constructing the huffman tree from the header... ")
 	root := CreateTreeFromHeader(&bitReader, size)
 
+	log.Println("Decoding the data... ")
 	text, err := getDecodedText(root, &bitReader)
 	if err != nil {
 		return err
@@ -31,6 +34,8 @@ func Decode(file *os.File, output string) error {
 	if err != nil {
 		return err
 	}
+
+	log.Println("Decoding finished. File: ", output)
 	return nil
 }
 

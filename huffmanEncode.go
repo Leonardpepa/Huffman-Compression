@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"unicode/utf8"
 )
@@ -15,22 +16,26 @@ const (
 )
 
 func Encode(file *os.File, output string) error {
+	log.Println("Creating huffman tree... ")
 	root, err := CreateHuffmanTreeFromFile(file)
 
 	if err != nil {
 		return err
 	}
 
+	log.Println("Calculating variable length codes... ")
 	table := calculateCodeForEachChar(root)
 
 	bitWriter := CreateBitWriter()
 
+	log.Println("Encoding the tree in the header... ")
 	size, err := encodeHuffmanHeaderInformation(root, PreOrder, &bitWriter)
 
 	if err != nil {
 		return err
 	}
 
+	log.Println("Encoding the data bit by bit... ")
 	err = createBits(file, &bitWriter, table)
 
 	if err != nil {
@@ -55,7 +60,7 @@ func Encode(file *os.File, output string) error {
 		return err
 	}
 
-	// finish writing bits
+	log.Println("Encoding finished. File: ", output)
 	return nil
 }
 

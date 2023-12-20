@@ -52,7 +52,7 @@ func main() {
 
 	} else if *d {
 		file := openFile(flag.Args()[0])
-		err := Decode(file, "decode.txt")
+		err := Decode(file, "decoded.txt")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -63,7 +63,7 @@ func main() {
 // TODO create cli api
 func openFile(filename string) *os.File {
 	file, err := os.Open(filename)
-
+	log.Println("Opening file... ", filename)
 	if err != nil {
 		log.Fatal(err)
 	}
