@@ -41,7 +41,7 @@ func (reader *Reader) getBitAt(num byte, i int) bool {
 	if i < 0 || i > 7 {
 		log.Fatal("Error index must be in bounds [0-7]")
 	}
-	if num&(1<<i) == 0 {
+	if num&(1<<(7-i)) == 0 {
 		return false
 	}
 
@@ -57,7 +57,7 @@ func (reader *Reader) Read() bool {
 		log.Fatal("No more bits to read. Abort")
 	}
 
-	bit := reader.getBitAt(reader.data[reader.offset], 7-reader.count)
+	bit := reader.getBitAt(reader.data[reader.offset], reader.count)
 
 	reader.count++
 	if reader.count == 8 {
@@ -76,15 +76,15 @@ func (reader *Reader) ReadChar() (rune, error) {
 
 	}
 
-	bit1 := reader.getBitAt(byte1, 7)
+	bit1 := reader.getBitAt(byte1, 0)
 	//0xxxxxxx
 	if bit1 == false {
 		r, _ := utf8.DecodeRune([]byte{byte1})
 		return r, nil
 	}
 
-	bit2 := reader.getBitAt(byte1, 6)
-	bit3 := reader.getBitAt(byte1, 5)
+	bit2 := reader.getBitAt(byte1, 1)
+	bit3 := reader.getBitAt(byte1, 2)
 
 	// 110xxxxx 10xxxxxx
 	if bit1 && bit2 && bit3 == false {
@@ -95,8 +95,8 @@ func (reader *Reader) ReadChar() (rune, error) {
 			return 0, err
 		}
 
-		bit1 = reader.getBitAt(byte2, 7)
-		bit2 = reader.getBitAt(byte2, 6)
+		bit1 = reader.getBitAt(byte2, 0)
+		bit2 = reader.getBitAt(byte2, 1)
 
 		if bit1 == false || bit2 == true {
 			log.Printf("%08b, %08b", byte1, byte2)
@@ -108,7 +108,7 @@ func (reader *Reader) ReadChar() (rune, error) {
 
 	}
 
-	bit4 := reader.getBitAt(byte1, 4)
+	bit4 := reader.getBitAt(byte1, 3)
 	// 1110xxxx 10xxxxxx 10xxxxxx
 	if bit1 && bit2 && bit3 && bit4 == false {
 		byte2, err := reader.ReadByte()
@@ -117,8 +117,8 @@ func (reader *Reader) ReadChar() (rune, error) {
 			return 0, err
 		}
 
-		bit1 = reader.getBitAt(byte2, 7)
-		bit2 = reader.getBitAt(byte2, 6)
+		bit1 = reader.getBitAt(byte2, 0)
+		bit2 = reader.getBitAt(byte2, 1)
 
 		if bit1 == false || bit2 == true {
 			log.Printf("%08b, %08b, error in the second byte", byte1, byte2)
@@ -131,8 +131,8 @@ func (reader *Reader) ReadChar() (rune, error) {
 			return 0, err
 		}
 
-		bit1 = reader.getBitAt(byte3, 7)
-		bit2 = reader.getBitAt(byte3, 6)
+		bit1 = reader.getBitAt(byte3, 0)
+		bit2 = reader.getBitAt(byte3, 1)
 
 		if bit1 == false || bit2 == true {
 			log.Printf("%08b, %08b, error in the third byte", byte1, byte2)
