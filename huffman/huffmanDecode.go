@@ -19,10 +19,19 @@ func Decode(file *os.File, output string) error {
 	}
 
 	bitReader := bitstream.CreateBitReader(data)
-	size := int(bitReader.ReadChar())
+	sizeRune, err := bitReader.ReadChar()
+	size := int(sizeRune)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	log.Println("Constructing the huffman tree from the header... ")
-	root := createTreeFromHeader(&bitReader, size)
+	root, err := createTreeFromHeader(&bitReader, size)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	log.Println("Decoding the data... ")
 	text, err := getDecodedText(root, &bitReader)
@@ -81,7 +90,7 @@ func decodeText(node *HuffmanTreeNode, bitReader *bitstream.Reader) (string, err
 	return strBuilder.String(), nil
 }
 
-func createTreeFromHeader(reader *bitstream.Reader, size int) *HuffmanTreeNode {
+func createTreeFromHeader(reader *bitstream.Reader, size int) (*HuffmanTreeNode, error) {
 	var root *HuffmanTreeNode
 	var current *HuffmanTreeNode
 
@@ -91,7 +100,10 @@ func createTreeFromHeader(reader *bitstream.Reader, size int) *HuffmanTreeNode {
 		switch bit {
 		case true:
 			count += 2
-			c := reader.ReadChar()
+			c, err := reader.ReadChar()
+			if err != nil {
+				return nil, err
+			}
 			current = backtrack(current)
 			createLeafNode(current, c)
 
@@ -108,7 +120,7 @@ func createTreeFromHeader(reader *bitstream.Reader, size int) *HuffmanTreeNode {
 		}
 	}
 
-	return root
+	return root, nil
 }
 
 func createInternalNode(current *HuffmanTreeNode) *HuffmanTreeNode {

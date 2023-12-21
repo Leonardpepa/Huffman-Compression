@@ -1,6 +1,7 @@
 package bitstream
 
 import (
+	"fmt"
 	"log"
 	"unicode/utf8"
 )
@@ -67,24 +68,31 @@ func (reader *Reader) Read() bool {
 	return bit
 }
 
-func (reader *Reader) ReadChar() rune {
+func (reader *Reader) ReadChar() (rune, error) {
 
-	byte1 := reader.ReadByte()
+	byte1, err := reader.ReadByte()
 
+	if err != nil {
+
+	}
 	//0xxxxxxx
 	if reader.getBitAsBool(byte1, 7) == false {
 		r, _ := utf8.DecodeRune([]byte{byte1})
-		return r
+		return r, nil
 	}
 
 	// 110xxxxx 10xxxxxx
 	if reader.getBitAsBool(byte1, 7) &&
 		reader.getBitAsBool(byte1, 6) &&
 		reader.getBitAsBool(byte1, 5) == false {
-		byte2 := reader.ReadByte()
+		byte2, err := reader.ReadByte()
+
+		if err != nil {
+			return 0, err
+		}
 
 		r, _ := utf8.DecodeRune([]byte{byte1, byte2})
-		return r
+		return r, nil
 
 	}
 
@@ -93,19 +101,25 @@ func (reader *Reader) ReadChar() rune {
 		reader.getBitAsBool(byte1, 6) &&
 		reader.getBitAsBool(byte1, 5) &&
 		reader.getBitAsBool(byte1, 4) == false {
-		byte2 := reader.ReadByte()
-		byte3 := reader.ReadByte()
+		byte2, err := reader.ReadByte()
 
+		if err != nil {
+			return 0, err
+		}
+		byte3, err := reader.ReadByte()
+
+		if err != nil {
+			return 0, err
+		}
 		r, _ := utf8.DecodeRune([]byte{byte1, byte2, byte3})
-		return r
+		return r, nil
 
 	}
 
-	log.Fatal("Error while decoding utf8 rune")
-	return 0
+	return 0, fmt.Errorf("error while decoding utf8 rune")
 }
 
-func (reader *Reader) ReadByte() byte {
+func (reader *Reader) ReadByte() (byte, error) {
 	writer := CreateBitWriter()
 	for reader.HasNext() {
 		bit := reader.Read()
@@ -115,6 +129,11 @@ func (reader *Reader) ReadByte() byte {
 			break
 		}
 	}
-	writer.WriteBytes()
-	return writer.Bytes()[0]
+
+	// it may stop before it reads 8bits
+	if writer.Size() == 0 {
+		return 0, fmt.Errorf("There are not enough bits to read a byte. ")
+	}
+
+	return writer.Bytes()[0], nil
 }
