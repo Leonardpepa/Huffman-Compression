@@ -1,7 +1,6 @@
 package huffman
 
 import (
-	"bufio"
 	"fmt"
 	"huffmanCompression/bitstream"
 	"io"
@@ -12,7 +11,7 @@ import (
 
 func Decode(file *os.File, output string) error {
 	log.Println("Reading encoded data... ")
-	data, err := io.ReadAll(bufio.NewReader(file))
+	data, err := io.ReadAll(file)
 
 	if err != nil {
 		return err

@@ -5,6 +5,7 @@ import (
 	"container/heap"
 	"fmt"
 	"io"
+	"log"
 	"os"
 )
 
@@ -159,6 +160,7 @@ func CreateHuffmanTreeFromFile(file *os.File) (*TreeNode, error) {
 		return nil, err
 	}
 
+	log.Println("Calculating frequencies...")
 	charFrequencies, err := calculateFrequencies(bufio.NewReader(file))
 
 	if err != nil {
@@ -167,8 +169,10 @@ func CreateHuffmanTreeFromFile(file *os.File) (*TreeNode, error) {
 
 	AddPseudoEOF(charFrequencies)
 
+	log.Println("Create priority queue...")
 	priorityQueue := CreatePriorityQueue(charFrequencies)
 
+	log.Println("Build the tree...")
 	root := BuildHuffmanTree(priorityQueue)
 
 	return root, nil
