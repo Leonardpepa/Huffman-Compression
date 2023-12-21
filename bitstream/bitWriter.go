@@ -13,7 +13,9 @@ type Writer struct {
 
 func CreateBitWriter() Writer {
 	return Writer{
-		data: make([]byte, 0),
+		data:    make([]byte, 0),
+		current: 0,
+		count:   0,
 	}
 }
 
@@ -77,14 +79,14 @@ func (writer *Writer) WriteRune(char rune) {
 	}
 }
 
-func (writer *Writer) WriteBytes() {
+func (writer *Writer) Flush() {
 	if writer.HasRemainingBits() {
 		writer.writeRemainingBitsWithPadding()
 	}
 }
 
 func (writer *Writer) HasRemainingBits() bool {
-	return writer.count != 0 && writer.count%8 != 0
+	return writer.count != 0 && writer.count <= 7
 }
 
 func (writer *Writer) writeRemainingBitsWithPadding() {

@@ -38,14 +38,14 @@ func Encode(file *os.File, output string) error {
 		return err
 	}
 
-	log.Println("Encoding the data bitstream by bitstream... ")
+	log.Println("Encoding the data bit by bit... ")
 	err = createBits(file, &bitWriter, table)
 
 	if err != nil {
 		return err
 	}
 
-	bitWriter.WriteBytes()
+	bitWriter.Flush()
 
 	sizeRune := rune(size)
 
@@ -80,7 +80,7 @@ func encodeHuffmanHeaderInformation(node *TreeNode, encodeType int, writer *bits
 		err = recursiveInOrderHeaderEncoding(node, writer, &count)
 	}
 	//// stop here
-	//writer.WriteBytes()
+	//writer.Flush()
 
 	if err != nil {
 		return 0, err
@@ -194,7 +194,7 @@ func createBits(file *os.File, bitWriter *bitstream.Writer, table map[rune]strin
 	}
 
 	//// finish the writing
-	//bitWriter.WriteBytes()
+	//bitWriter.Flush()
 
 	return nil
 }

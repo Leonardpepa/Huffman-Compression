@@ -41,11 +41,7 @@ func (reader *Reader) getBitAt(num byte, i int) bool {
 	if i < 0 || i > 7 {
 		log.Fatal("Error index must be in bounds [0-7]")
 	}
-	if num&(1<<(7-i)) == 0 {
-		return false
-	}
-
-	return true
+	return num&(1<<(7-i)) != 0
 }
 
 func (reader *Reader) HasNext() bool {
