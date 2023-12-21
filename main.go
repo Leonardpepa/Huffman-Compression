@@ -11,21 +11,21 @@ import (
 
 func main() {
 
-	c := flag.Bool("c", false, "Specify a file to compress")
-	d := flag.Bool("d", false, "Specify a file to decompress")
-	h := flag.Bool("h", false, "Usage")
+	compress := flag.Bool("c", false, "Specify a file to compress")
+	decompress := flag.Bool("d", false, "Specify a file to decompress")
+	help := flag.Bool("h", false, "Usage")
 
 	flag.Parse()
 
-	if *h {
+	if *help {
 		usage()
 	}
 
-	if *c == false && *d == false {
+	if *compress == false && *decompress == false {
 		usage()
 	}
 
-	if *c && *d {
+	if *compress && *decompress {
 		log.Fatal("You can choose either compress or decompress. Try '--help' for more information.")
 	}
 
@@ -33,18 +33,23 @@ func main() {
 		log.Fatal("Please provide a file. Try '--help' for more information.")
 	}
 
-	if *c {
+	if *compress {
 		file := openFile(flag.Args()[0])
 
-		err := huffman.Encode(file, filepath.Base(file.Name())+".hf")
+		// add the .hf extension
+		outputPath := filepath.Base(file.Name()) + ".hf"
+		err := huffman.Encode(file, outputPath)
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
-	} else if *d {
+	} else if *decompress {
 		file := openFile(flag.Args()[0])
-		err := huffman.Decode(file, strings.Split(filepath.Base(file.Name()), ".hf")[0])
+
+		// remove the .hf extension
+		outputPath := strings.Split(filepath.Base(file.Name()), ".hf")[0]
+		err := huffman.Decode(file, outputPath)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -65,7 +70,6 @@ Usage: huffman.exe [OPTIONS]... [FILE]
 `)
 }
 
-// TODO create cli api
 func openFile(filename string) *os.File {
 	file, err := os.Open(filename)
 	log.Println("Opening file... ", filename)
