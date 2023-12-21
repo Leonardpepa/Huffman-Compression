@@ -49,7 +49,7 @@ func Decode(file *os.File, output string) error {
 	return nil
 }
 
-func getDecodedText(root *HuffmanTreeNode, bitReader *bitstream.Reader) (*string, error) {
+func getDecodedText(root *TreeNode, bitReader *bitstream.Reader) (*string, error) {
 
 	text, err := decodeText(root, bitReader)
 
@@ -59,7 +59,7 @@ func getDecodedText(root *HuffmanTreeNode, bitReader *bitstream.Reader) (*string
 	return &text, nil
 }
 
-func decodeText(node *HuffmanTreeNode, bitReader *bitstream.Reader) (string, error) {
+func decodeText(node *TreeNode, bitReader *bitstream.Reader) (string, error) {
 	var strBuilder strings.Builder
 	temp := node
 
@@ -90,9 +90,9 @@ func decodeText(node *HuffmanTreeNode, bitReader *bitstream.Reader) (string, err
 	return strBuilder.String(), nil
 }
 
-func createTreeFromHeader(reader *bitstream.Reader, size int) (*HuffmanTreeNode, error) {
-	var root *HuffmanTreeNode
-	var current *HuffmanTreeNode
+func createTreeFromHeader(reader *bitstream.Reader, size int) (*TreeNode, error) {
+	var root *TreeNode
+	var current *TreeNode
 
 	count := 0
 	for count < size && reader.HasNext() {
@@ -110,7 +110,7 @@ func createTreeFromHeader(reader *bitstream.Reader, size int) (*HuffmanTreeNode,
 		case false:
 			count++
 			if current == nil {
-				root = &HuffmanTreeNode{}
+				root = &TreeNode{}
 				current = root
 				continue
 			}
@@ -123,13 +123,13 @@ func createTreeFromHeader(reader *bitstream.Reader, size int) (*HuffmanTreeNode,
 	return root, nil
 }
 
-func createInternalNode(current *HuffmanTreeNode) *HuffmanTreeNode {
+func createInternalNode(current *TreeNode) *TreeNode {
 	if current.Left == nil {
-		temp := &HuffmanTreeNode{Parent: current}
+		temp := &TreeNode{Parent: current}
 		current.Left = temp
 		current = current.Left
 	} else if current.Right == nil {
-		temp := &HuffmanTreeNode{Parent: current}
+		temp := &TreeNode{Parent: current}
 		current.Right = temp
 		current = current.Right
 	} else {
@@ -139,17 +139,17 @@ func createInternalNode(current *HuffmanTreeNode) *HuffmanTreeNode {
 	return current
 }
 
-func createLeafNode(current *HuffmanTreeNode, c rune) {
+func createLeafNode(current *TreeNode, c rune) {
 	if current.Left == nil {
-		temp := &HuffmanTreeNode{Parent: current, IsLeaf: true, Char: c}
+		temp := &TreeNode{Parent: current, IsLeaf: true, Char: c}
 		current.Left = temp
 	} else if current.Right == nil {
-		temp := &HuffmanTreeNode{Parent: current, IsLeaf: true, Char: c}
+		temp := &TreeNode{Parent: current, IsLeaf: true, Char: c}
 		current.Right = temp
 	}
 }
 
-func backtrack(current *HuffmanTreeNode) *HuffmanTreeNode {
+func backtrack(current *TreeNode) *TreeNode {
 	for current.Left != nil && current.Right != nil {
 		if current.Parent == nil {
 			log.Fatal("Error while decoding tree, nil pointer")

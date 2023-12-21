@@ -67,7 +67,7 @@ func Encode(file *os.File, output string) error {
 	return nil
 }
 
-func encodeHuffmanHeaderInformation(node *HuffmanTreeNode, encodeType int, writer *bitstream.Writer) (int, error) {
+func encodeHuffmanHeaderInformation(node *TreeNode, encodeType int, writer *bitstream.Writer) (int, error) {
 	var err error
 	// root node
 	count := 0
@@ -88,7 +88,7 @@ func encodeHuffmanHeaderInformation(node *HuffmanTreeNode, encodeType int, write
 	return count, nil
 }
 
-func recursivePreOrderHeaderEncoding(node *HuffmanTreeNode, writer *bitstream.Writer, count *int) error {
+func recursivePreOrderHeaderEncoding(node *TreeNode, writer *bitstream.Writer, count *int) error {
 	var err error
 	if node == nil {
 		return fmt.Errorf("error nil pointer given for header encoding")
@@ -114,7 +114,7 @@ func recursivePreOrderHeaderEncoding(node *HuffmanTreeNode, writer *bitstream.Wr
 	return err
 }
 
-func recursivePostOrderHeaderEncoding(node *HuffmanTreeNode, writer *bitstream.Writer, count *int) error {
+func recursivePostOrderHeaderEncoding(node *TreeNode, writer *bitstream.Writer, count *int) error {
 	var err error
 	if node == nil {
 		return fmt.Errorf("error nil pointer given for header encoding")
@@ -140,7 +140,7 @@ func recursivePostOrderHeaderEncoding(node *HuffmanTreeNode, writer *bitstream.W
 	return err
 }
 
-func recursiveInOrderHeaderEncoding(node *HuffmanTreeNode, writer *bitstream.Writer, count *int) error {
+func recursiveInOrderHeaderEncoding(node *TreeNode, writer *bitstream.Writer, count *int) error {
 	var err error
 	if node == nil {
 		return fmt.Errorf("error nil pointer given for header encoding")

@@ -8,10 +8,10 @@ import (
 	"os"
 )
 
-type HuffmanTreeNode struct {
-	Left   *HuffmanTreeNode
-	Right  *HuffmanTreeNode
-	Parent *HuffmanTreeNode
+type TreeNode struct {
+	Left   *TreeNode
+	Right  *TreeNode
+	Parent *TreeNode
 	Weight uint64
 	Char   rune
 	IsLeaf bool
@@ -19,7 +19,7 @@ type HuffmanTreeNode struct {
 	index  int
 }
 
-type PriorityQueue []*HuffmanTreeNode
+type PriorityQueue []*TreeNode
 
 func (pq PriorityQueue) Len() int { return len(pq) }
 
@@ -35,7 +35,7 @@ func (pq PriorityQueue) Swap(i, j int) {
 
 func (pq *PriorityQueue) Push(x any) {
 	n := len(*pq)
-	item := x.(*HuffmanTreeNode)
+	item := x.(*TreeNode)
 	item.index = n
 	*pq = append(*pq, item)
 }
@@ -51,18 +51,18 @@ func (pq *PriorityQueue) Pop() any {
 }
 
 // update modifies the priority and value of an Item in the queue.
-func (pq *PriorityQueue) update(item *HuffmanTreeNode, weight uint64) {
+func (pq *PriorityQueue) update(item *TreeNode, weight uint64) {
 	item.Weight = weight
 	heap.Fix(pq, item.index)
 }
 
-func CreateLeafNode(char rune, freq uint64) *HuffmanTreeNode {
-	return &HuffmanTreeNode{Left: nil, Right: nil, Parent: nil, Char: char, Weight: freq, IsLeaf: true}
+func CreateLeafNode(char rune, freq uint64) *TreeNode {
+	return &TreeNode{Left: nil, Right: nil, Parent: nil, Char: char, Weight: freq, IsLeaf: true}
 }
 
-func CreateHuffmanNode(a *HuffmanTreeNode, b *HuffmanTreeNode) *HuffmanTreeNode {
-	var leftNode *HuffmanTreeNode
-	var rightNode *HuffmanTreeNode
+func CreateHuffmanNode(a *TreeNode, b *TreeNode) *TreeNode {
+	var leftNode *TreeNode
+	var rightNode *TreeNode
 	if a.Weight <= b.Weight {
 		leftNode = a
 		rightNode = b
@@ -70,7 +70,7 @@ func CreateHuffmanNode(a *HuffmanTreeNode, b *HuffmanTreeNode) *HuffmanTreeNode 
 		leftNode = b
 		rightNode = a
 	}
-	parent := &HuffmanTreeNode{
+	parent := &TreeNode{
 		Left:   leftNode,
 		Right:  rightNode,
 		Weight: leftNode.Weight + rightNode.Weight,
@@ -81,14 +81,14 @@ func CreateHuffmanNode(a *HuffmanTreeNode, b *HuffmanTreeNode) *HuffmanTreeNode 
 	return parent
 }
 
-func BuildHuffmanTree(pq PriorityQueue) *HuffmanTreeNode {
-	var a *HuffmanTreeNode
-	var b *HuffmanTreeNode
-	var root *HuffmanTreeNode
+func BuildHuffmanTree(pq PriorityQueue) *TreeNode {
+	var a *TreeNode
+	var b *TreeNode
+	var root *TreeNode
 
 	for pq.Len() > 1 {
-		a = heap.Pop(&pq).(*HuffmanTreeNode)
-		b = heap.Pop(&pq).(*HuffmanTreeNode)
+		a = heap.Pop(&pq).(*TreeNode)
+		b = heap.Pop(&pq).(*TreeNode)
 		root = CreateHuffmanNode(a, b)
 
 		heap.Push(&pq, root)
@@ -96,7 +96,6 @@ func BuildHuffmanTree(pq PriorityQueue) *HuffmanTreeNode {
 	return root
 }
 
-// create priority queue
 func CreatePriorityQueue(charFrequencies map[rune]uint64) PriorityQueue {
 	pq := make(PriorityQueue, 0)
 
@@ -113,25 +112,25 @@ func CreatePriorityQueue(charFrequencies map[rune]uint64) PriorityQueue {
 	return pq
 }
 
-func TraverseTree(root *HuffmanTreeNode) {
+func TraverseTreeInorder(root *TreeNode) {
 	if root.Left != nil {
-		TraverseTree(root.Left)
+		TraverseTreeInorder(root.Left)
 	}
 	if root != nil && root.IsLeaf {
 		fmt.Printf("Char: %v, %#v, freq: %d, Code: %v, bits: %d\n", root.Char, string(root.Char), root.Weight, root.Code, len(root.Code))
 	}
 	if root.Right != nil {
-		TraverseTree(root.Right)
+		TraverseTreeInorder(root.Right)
 	}
 }
 
-func CalculateCodeForEachChar(node *HuffmanTreeNode) map[rune]string {
+func CalculateCodeForEachChar(node *TreeNode) map[rune]string {
 	table := make(map[rune]string)
 	calculateCode(node, table, "")
 	return table
 }
 
-func calculateCode(node *HuffmanTreeNode, table map[rune]string, c string) {
+func calculateCode(node *TreeNode, table map[rune]string, c string) {
 	if node.Left != nil {
 		calculateCode(node.Left, table, c+"0")
 	}
@@ -144,7 +143,7 @@ func calculateCode(node *HuffmanTreeNode, table map[rune]string, c string) {
 	}
 }
 
-func CreateHuffmanTreeFromFrequencies(charFrequencies map[rune]uint64) *HuffmanTreeNode {
+func CreateHuffmanTreeFromFrequencies(charFrequencies map[rune]uint64) *TreeNode {
 
 	priorityQueue := CreatePriorityQueue(charFrequencies)
 
@@ -153,7 +152,7 @@ func CreateHuffmanTreeFromFrequencies(charFrequencies map[rune]uint64) *HuffmanT
 	return root
 }
 
-func CreateHuffmanTreeFromFile(file *os.File) (*HuffmanTreeNode, error) {
+func CreateHuffmanTreeFromFile(file *os.File) (*TreeNode, error) {
 	_, err := file.Seek(0, io.SeekStart)
 
 	if err != nil {
