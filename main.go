@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+var programName = filepath.Base(os.Args[0])
+
 func main() {
 
 	compress := flag.Bool("c", false, "Specify a file to compress")
@@ -58,8 +60,8 @@ func main() {
 }
 
 func usage() {
-	log.Fatal(`
-Usage: huffman.exe [OPTIONS]... [FILE]
+	log.Fatalf(`
+Usage: %s [OPTIONS]... [FILE]
 [OPTIONS]:
   -c FILE ~file to compress
   -d FILE ~file to decompress
@@ -67,7 +69,7 @@ Usage: huffman.exe [OPTIONS]... [FILE]
   the file specified is the file to compress or decompress,
   when compressed the file will be saved with a .hf extension,
   when decompressed the file will be saved as a copy of the original file
-`)
+`, programName)
 }
 
 func openFile(filename string) *os.File {
