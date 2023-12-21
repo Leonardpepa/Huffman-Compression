@@ -29,7 +29,6 @@ func Encode(file *os.File, output string) error {
 	log.Println("Calculating variable length codes... ")
 	table := CalculateCodeForEachChar(root)
 
-	TraverseTreeInorder(root)
 	bitWriter := bitstream.CreateBitWriter()
 
 	log.Println("Encoding the tree in the header... ")
