@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"unicode/utf8"
 )
 
 type TreeNode struct {
@@ -117,8 +118,11 @@ func TraverseTreeInorder(root *TreeNode) {
 	if root.Left != nil {
 		TraverseTreeInorder(root.Left)
 	}
+
 	if root != nil && root.IsLeaf {
-		fmt.Printf("Char: %v, %#v, freq: %d, Code: %v, bits: %d\n", root.Char, string(root.Char), root.Weight, root.Code, len(root.Code))
+		p := make([]byte, utf8.RuneLen(root.Char))
+		utf8.EncodeRune(p, root.Char)
+		fmt.Printf("bytes: %b, Char: %v, %#v, freq: %d, Code: %v, bits: %d\n", p, root.Char, string(root.Char), root.Weight, root.Code, len(root.Code))
 	}
 	if root.Right != nil {
 		TraverseTreeInorder(root.Right)

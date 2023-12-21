@@ -69,7 +69,7 @@ func (reader *Reader) ReadChar() (rune, error) {
 	byte1, err := reader.ReadByte()
 
 	if err != nil {
-
+		return 0, err
 	}
 
 	bit1 := reader.getBitAt(byte1, 0)
@@ -87,7 +87,6 @@ func (reader *Reader) ReadChar() (rune, error) {
 		byte2, err := reader.ReadByte()
 
 		if err != nil {
-
 			return 0, err
 		}
 
@@ -131,13 +130,62 @@ func (reader *Reader) ReadChar() (rune, error) {
 		bit2 = reader.getBitAt(byte3, 1)
 
 		if bit1 == false || bit2 == true {
-			log.Printf("%08b, %08b, error in the third byte", byte1, byte2)
+			log.Printf("%08b, %08b, %08b, error in the third byte", byte1, byte2, byte3)
 			return 0, fmt.Errorf("error while decoding 1110xxxx 10xxxxxx 10xxxxxx utf8 rune")
 		}
 
 		r, _ := utf8.DecodeRune([]byte{byte1, byte2, byte3})
 		return r, nil
+	}
 
+	// 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+	bit5 := reader.getBitAt(byte1, 4)
+
+	if bit1 && bit2 && bit3 && bit4 && bit5 == false {
+		byte2, err := reader.ReadByte()
+
+		if err != nil {
+			return 0, err
+		}
+
+		bit1 = reader.getBitAt(byte2, 0)
+		bit2 = reader.getBitAt(byte2, 1)
+
+		if bit1 == false || bit2 == true {
+			log.Printf("%08b, %08b, error in the second byte", byte1, byte2)
+			return 0, fmt.Errorf("error while decoding 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx utf8 rune")
+		}
+
+		byte3, err := reader.ReadByte()
+
+		if err != nil {
+			return 0, err
+		}
+
+		bit1 = reader.getBitAt(byte3, 0)
+		bit2 = reader.getBitAt(byte3, 1)
+
+		if bit1 == false || bit2 == true {
+			log.Printf("%08b, %08b, %08b, error in the fourth byte", byte1, byte2, byte3)
+			return 0, fmt.Errorf("error while decoding 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx utf8 rune")
+		}
+
+		byte4, err := reader.ReadByte()
+
+		if err != nil {
+			return 0, err
+		}
+
+		bit1 = reader.getBitAt(byte4, 0)
+		bit2 = reader.getBitAt(byte4, 1)
+
+		if bit1 == false || bit2 == true {
+			log.Printf("%08b, %08b, %08b, %08b, error in the fourth byte", byte1, byte2, byte3, byte4)
+			return 0, fmt.Errorf("error while decoding 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx utf8 rune")
+		}
+
+		r, _ := utf8.DecodeRune([]byte{byte1, byte2, byte3, byte4})
+		return r, nil
 	}
 
 	return 0, fmt.Errorf("error while decoding utf8 rune")
