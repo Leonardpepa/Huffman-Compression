@@ -63,7 +63,12 @@ func decodeText(node *TreeNode, bitReader *bitstream.Reader) (string, error) {
 	temp := node
 
 	for bitReader.HasNext() {
-		switch bitReader.Read() {
+		bit, err := bitReader.Read()
+		if err != nil {
+			return "", err
+		}
+
+		switch bit {
 		case false:
 			temp = temp.Left
 		case true:
@@ -95,7 +100,10 @@ func createTreeFromHeader(reader *bitstream.Reader, size int) (*TreeNode, error)
 
 	count := 0
 	for count < size && reader.HasNext() {
-		bit := reader.Read()
+		bit, err := reader.Read()
+		if err != nil {
+			return nil, err
+		}
 		switch bit {
 		case true:
 			count += 2

@@ -96,7 +96,10 @@ func recursivePreOrderHeaderEncoding(node *TreeNode, writer *bitstream.Writer, c
 
 	if node.IsLeaf {
 		writer.WriteBitFromBool(true)
-		writer.WriteRune(node.Char)
+		err := writer.WriteRune(node.Char)
+		if err != nil {
+			return err
+		}
 		*count = *count + 2
 	} else {
 		writer.WriteBitFromBool(false)
@@ -130,7 +133,10 @@ func recursivePostOrderHeaderEncoding(node *TreeNode, writer *bitstream.Writer, 
 
 	if node.IsLeaf {
 		writer.WriteBitFromBool(true)
-		writer.WriteRune(node.Char)
+		err := writer.WriteRune(node.Char)
+		if err != nil {
+			return err
+		}
 		*count = *count + 2
 	} else {
 		writer.WriteBitFromBool(false)
@@ -152,7 +158,10 @@ func recursiveInOrderHeaderEncoding(node *TreeNode, writer *bitstream.Writer, co
 
 	if node.IsLeaf {
 		writer.WriteBitFromBool(true)
-		writer.WriteRune(node.Char)
+		err := writer.WriteRune(node.Char)
+		if err != nil {
+			return err
+		}
 		*count = *count + 2
 	} else {
 		writer.WriteBitFromBool(false)

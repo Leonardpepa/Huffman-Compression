@@ -67,16 +67,20 @@ func (writer *Writer) appendByte() {
 	writer.count = 0
 }
 
-func (writer *Writer) WriteRune(char rune) {
+func (writer *Writer) WriteRune(char rune) error {
 	b := make([]byte, utf8.RuneLen(char))
 	utf8.EncodeRune(b, char)
 
 	bitReader := CreateBitReader(b)
 
 	for bitReader.HasNext() {
-		bit := bitReader.Read()
+		bit, err := bitReader.Read()
+		if err != nil {
+			return err
+		}
 		writer.WriteBitFromBool(bit)
 	}
+	return nil
 }
 
 func (writer *Writer) Flush() {

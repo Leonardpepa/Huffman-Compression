@@ -11,6 +11,12 @@ func btoi(b bool) int {
 	}
 	return 0
 }
+
+func checkerr(t *testing.T, err error) {
+	if err != nil {
+		t.Error(err)
+	}
+}
 func TestReadBit(t *testing.T) {
 
 	b := make([]byte, 0)
@@ -19,14 +25,29 @@ func TestReadBit(t *testing.T) {
 
 	reader := CreateBitReader(b)
 
-	bit1 := reader.Read()
-	bit2 := reader.Read()
-	bit3 := reader.Read()
-	bit4 := reader.Read()
-	bit5 := reader.Read()
-	bit6 := reader.Read()
-	bit7 := reader.Read()
-	bit8 := reader.Read()
+	bit1, err := reader.Read()
+	checkerr(t, err)
+
+	bit2, err := reader.Read()
+	checkerr(t, err)
+
+	bit3, err := reader.Read()
+	checkerr(t, err)
+
+	bit4, err := reader.Read()
+	checkerr(t, err)
+
+	bit5, err := reader.Read()
+	checkerr(t, err)
+
+	bit6, err := reader.Read()
+	checkerr(t, err)
+
+	bit7, err := reader.Read()
+	checkerr(t, err)
+
+	bit8, err := reader.Read()
+	checkerr(t, err)
 
 	if bit1 {
 		t.Errorf("expected bit1: 0, got %d", btoi(bit1))
@@ -47,9 +68,11 @@ func TestReadBit(t *testing.T) {
 	if !bit5 {
 		t.Errorf("expected bit5: 1, got %d", btoi(bit5))
 	}
+
 	if bit6 {
 		t.Errorf("expected bit6: 0, got %d", btoi(bit6))
 	}
+
 	if bit7 {
 		t.Errorf("expected bit7: 0, got %d", btoi(bit7))
 	}
@@ -69,9 +92,7 @@ func TestReadByte(t *testing.T) {
 
 	byte1, err := reader.ReadByte()
 
-	if err != nil {
-		t.Error(err)
-	}
+	checkerr(t, err)
 
 	if byte1 != reader.Bytes()[0] {
 		t.Errorf("expected 11101001, got %08b", byte1)
@@ -89,9 +110,7 @@ func TestReadCharacter(t *testing.T) {
 
 	char, err := reader.ReadChar()
 
-	if err != nil {
-		t.Error(err)
-	}
+	checkerr(t, err)
 
 	if char != expect {
 		t.Errorf("expected %b, got %b", expect, char)
@@ -121,7 +140,9 @@ func TestHasNext(t *testing.T) {
 	reader := CreateBitReader(b)
 	count := 0
 	for reader.HasNext() {
-		reader.Read()
+		_, err := reader.Read()
+
+		checkerr(t, err)
 		count++
 	}
 

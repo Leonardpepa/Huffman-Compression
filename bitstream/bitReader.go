@@ -48,9 +48,9 @@ func (reader *Reader) HasNext() bool {
 	return reader.offset < reader.length
 }
 
-func (reader *Reader) Read() bool {
+func (reader *Reader) Read() (bool, error) {
 	if reader.HasNext() == false {
-		log.Fatal("No more bits to read. Abort")
+		return false, fmt.Errorf("No more bits to read.")
 	}
 
 	bit := reader.getBitAt(reader.data[reader.offset], reader.count)
@@ -61,7 +61,7 @@ func (reader *Reader) Read() bool {
 		reader.offset++
 	}
 
-	return bit
+	return bit, nil
 }
 
 // reads utf8 rune
@@ -195,7 +195,10 @@ func (reader *Reader) ReadChar() (rune, error) {
 func (reader *Reader) ReadByte() (byte, error) {
 	writer := CreateBitWriter()
 	for reader.HasNext() {
-		bit := reader.Read()
+		bit, err := reader.Read()
+		if err != nil {
+			return 0, err
+		}
 		writer.WriteBitFromBool(bit)
 
 		if writer.Size() == 1 {
