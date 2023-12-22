@@ -67,7 +67,7 @@ func (writer *Writer) appendByte() {
 	writer.count = 0
 }
 
-func (writer *Writer) WriteRune(char rune) error {
+func (writer *Writer) WriteUtf8Rune(char rune) error {
 	b := make([]byte, utf8.RuneLen(char))
 	utf8.EncodeRune(b, char)
 
@@ -86,6 +86,9 @@ func (writer *Writer) WriteRune(char rune) error {
 func (writer *Writer) Flush() {
 	if writer.HasRemainingBits() {
 		writer.writeRemainingBitsWithPadding()
+	} else {
+		writer.current = byte(0)
+		writer.count = 0
 	}
 }
 
