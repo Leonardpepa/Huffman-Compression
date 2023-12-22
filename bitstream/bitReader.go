@@ -94,7 +94,7 @@ func (reader *Reader) ReadChar() (rune, error) {
 	}
 
 	//0xxxxxxx
-	if bit1 == false {
+	if !bit1 {
 		r, _ := utf8.DecodeRune([]byte{byte1})
 		return r, nil
 	}
@@ -110,7 +110,7 @@ func (reader *Reader) ReadChar() (rune, error) {
 	}
 
 	// 110xxxxx 10xxxxxx
-	if bit1 && bit2 && bit3 == false {
+	if bit1 && bit2 && !bit3 {
 		byte2, err := reader.ReadByte()
 
 		if err != nil {
@@ -127,7 +127,7 @@ func (reader *Reader) ReadChar() (rune, error) {
 			return 0, err
 		}
 
-		if bit1 == false || bit2 == true {
+		if !bit1 || bit2 {
 			log.Printf("%08b, %08b", byte1, byte2)
 			return 0, fmt.Errorf("error while decoding 110xxxxx 10xxxxxx utf8 rune")
 		}
@@ -143,7 +143,7 @@ func (reader *Reader) ReadChar() (rune, error) {
 	}
 
 	// 1110xxxx 10xxxxxx 10xxxxxx
-	if bit1 && bit2 && bit3 && bit4 == false {
+	if bit1 && bit2 && bit3 && !bit4 {
 		byte2, err := reader.ReadByte()
 
 		if err != nil {
@@ -160,7 +160,7 @@ func (reader *Reader) ReadChar() (rune, error) {
 			return 0, err
 		}
 
-		if bit1 == false || bit2 == true {
+		if !bit1 || bit2 {
 			log.Printf("%08b, %08b, error in the second byte", byte1, byte2)
 			return 0, fmt.Errorf("error while decoding 1110xxxx 10xxxxxx 10xxxxxx utf8 rune")
 		}
@@ -181,7 +181,7 @@ func (reader *Reader) ReadChar() (rune, error) {
 			return 0, err
 		}
 
-		if bit1 == false || bit2 == true {
+		if !bit1 || bit2 {
 			log.Printf("%08b, %08b, %08b, error in the third byte", byte1, byte2, byte3)
 			return 0, fmt.Errorf("error while decoding 1110xxxx 10xxxxxx 10xxxxxx utf8 rune")
 		}
@@ -196,7 +196,7 @@ func (reader *Reader) ReadChar() (rune, error) {
 		return 0, err
 	}
 
-	if bit1 && bit2 && bit3 && bit4 && bit5 == false {
+	if bit1 && bit2 && bit3 && bit4 && !bit5 {
 		byte2, err := reader.ReadByte()
 
 		if err != nil {
@@ -213,7 +213,7 @@ func (reader *Reader) ReadChar() (rune, error) {
 			return 0, err
 		}
 
-		if bit1 == false || bit2 == true {
+		if !bit1 || bit2 {
 			log.Printf("%08b, %08b, error in the second byte", byte1, byte2)
 			return 0, fmt.Errorf("error while decoding 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx utf8 rune")
 		}
@@ -234,7 +234,7 @@ func (reader *Reader) ReadChar() (rune, error) {
 			return 0, err
 		}
 
-		if bit1 == false || bit2 == true {
+		if !bit1 || bit2 {
 			log.Printf("%08b, %08b, %08b, error in the fourth byte", byte1, byte2, byte3)
 			return 0, fmt.Errorf("error while decoding 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx utf8 rune")
 		}
@@ -255,7 +255,7 @@ func (reader *Reader) ReadChar() (rune, error) {
 			return 0, err
 		}
 
-		if bit1 == false || bit2 == true {
+		if !bit1 || bit2 {
 			log.Printf("%08b, %08b, %08b, %08b, error in the fourth byte", byte1, byte2, byte3, byte4)
 			return 0, fmt.Errorf("error while decoding 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx utf8 rune")
 		}
