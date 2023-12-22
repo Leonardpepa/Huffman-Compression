@@ -125,7 +125,9 @@ func TestReadBitAtPosition(t *testing.T) {
 
 	reader := CreateBitReader(b)
 
-	bit := reader.getBitAt(reader.Bytes()[0], 2)
+	bit, err := reader.getBitAt(reader.Bytes()[0], 2)
+
+	checkerr(t, err)
 
 	if !bit {
 		t.Errorf("expected 1, got %d", btoi(bit))

@@ -37,11 +37,11 @@ func (reader *Reader) BitPosition() int {
 	return reader.count
 }
 
-func (reader *Reader) getBitAt(num byte, i int) bool {
+func (reader *Reader) getBitAt(num byte, i int) (bool, error) {
 	if i < 0 || i > 7 {
-		log.Fatal("Error index must be in bounds [0-7]")
+		return false, fmt.Errorf("index out of bounds when reading bit")
 	}
-	return num&(1<<(7-i)) != 0
+	return num&(1<<(7-i)) != 0, nil
 }
 
 func (reader *Reader) HasNext() bool {
@@ -53,8 +53,11 @@ func (reader *Reader) Read() (bool, error) {
 		return false, fmt.Errorf("No more bits to read.")
 	}
 
-	bit := reader.getBitAt(reader.data[reader.offset], reader.count)
+	bit, err := reader.getBitAt(reader.data[reader.offset], reader.count)
 
+	if err != nil {
+		return false, err
+	}
 	reader.count++
 	if reader.count == 8 {
 		reader.count = 0
@@ -73,15 +76,26 @@ func (reader *Reader) ReadChar() (rune, error) {
 		return 0, err
 	}
 
-	bit1 := reader.getBitAt(byte1, 0)
+	bit1, err := reader.getBitAt(byte1, 0)
+	if err != nil {
+		return 0, err
+	}
+
 	//0xxxxxxx
 	if bit1 == false {
 		r, _ := utf8.DecodeRune([]byte{byte1})
 		return r, nil
 	}
 
-	bit2 := reader.getBitAt(byte1, 1)
-	bit3 := reader.getBitAt(byte1, 2)
+	bit2, err := reader.getBitAt(byte1, 1)
+	if err != nil {
+		return 0, err
+	}
+
+	bit3, err := reader.getBitAt(byte1, 2)
+	if err != nil {
+		return 0, err
+	}
 
 	// 110xxxxx 10xxxxxx
 	if bit1 && bit2 && bit3 == false {
@@ -91,8 +105,15 @@ func (reader *Reader) ReadChar() (rune, error) {
 			return 0, err
 		}
 
-		bit1 = reader.getBitAt(byte2, 0)
-		bit2 = reader.getBitAt(byte2, 1)
+		bit1, err = reader.getBitAt(byte2, 0)
+		if err != nil {
+			return 0, err
+		}
+
+		bit2, err = reader.getBitAt(byte2, 1)
+		if err != nil {
+			return 0, err
+		}
 
 		if bit1 == false || bit2 == true {
 			log.Printf("%08b, %08b", byte1, byte2)
@@ -104,7 +125,11 @@ func (reader *Reader) ReadChar() (rune, error) {
 
 	}
 
-	bit4 := reader.getBitAt(byte1, 3)
+	bit4, err := reader.getBitAt(byte1, 3)
+	if err != nil {
+		return 0, err
+	}
+
 	// 1110xxxx 10xxxxxx 10xxxxxx
 	if bit1 && bit2 && bit3 && bit4 == false {
 		byte2, err := reader.ReadByte()
@@ -113,8 +138,15 @@ func (reader *Reader) ReadChar() (rune, error) {
 			return 0, err
 		}
 
-		bit1 = reader.getBitAt(byte2, 0)
-		bit2 = reader.getBitAt(byte2, 1)
+		bit1, err = reader.getBitAt(byte2, 0)
+		if err != nil {
+			return 0, err
+		}
+
+		bit2, err = reader.getBitAt(byte2, 1)
+		if err != nil {
+			return 0, err
+		}
 
 		if bit1 == false || bit2 == true {
 			log.Printf("%08b, %08b, error in the second byte", byte1, byte2)
@@ -127,8 +159,15 @@ func (reader *Reader) ReadChar() (rune, error) {
 			return 0, err
 		}
 
-		bit1 = reader.getBitAt(byte3, 0)
-		bit2 = reader.getBitAt(byte3, 1)
+		bit1, err = reader.getBitAt(byte3, 0)
+		if err != nil {
+			return 0, err
+		}
+
+		bit2, err = reader.getBitAt(byte3, 1)
+		if err != nil {
+			return 0, err
+		}
 
 		if bit1 == false || bit2 == true {
 			log.Printf("%08b, %08b, %08b, error in the third byte", byte1, byte2, byte3)
@@ -140,7 +179,10 @@ func (reader *Reader) ReadChar() (rune, error) {
 	}
 
 	// 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-	bit5 := reader.getBitAt(byte1, 4)
+	bit5, err := reader.getBitAt(byte1, 4)
+	if err != nil {
+		return 0, err
+	}
 
 	if bit1 && bit2 && bit3 && bit4 && bit5 == false {
 		byte2, err := reader.ReadByte()
@@ -149,8 +191,15 @@ func (reader *Reader) ReadChar() (rune, error) {
 			return 0, err
 		}
 
-		bit1 = reader.getBitAt(byte2, 0)
-		bit2 = reader.getBitAt(byte2, 1)
+		bit1, err = reader.getBitAt(byte2, 0)
+		if err != nil {
+			return 0, err
+		}
+
+		bit2, err = reader.getBitAt(byte2, 1)
+		if err != nil {
+			return 0, err
+		}
 
 		if bit1 == false || bit2 == true {
 			log.Printf("%08b, %08b, error in the second byte", byte1, byte2)
@@ -163,8 +212,15 @@ func (reader *Reader) ReadChar() (rune, error) {
 			return 0, err
 		}
 
-		bit1 = reader.getBitAt(byte3, 0)
-		bit2 = reader.getBitAt(byte3, 1)
+		bit1, err = reader.getBitAt(byte3, 0)
+		if err != nil {
+			return 0, err
+		}
+
+		bit2, err = reader.getBitAt(byte3, 1)
+		if err != nil {
+			return 0, err
+		}
 
 		if bit1 == false || bit2 == true {
 			log.Printf("%08b, %08b, %08b, error in the fourth byte", byte1, byte2, byte3)
@@ -177,8 +233,15 @@ func (reader *Reader) ReadChar() (rune, error) {
 			return 0, err
 		}
 
-		bit1 = reader.getBitAt(byte4, 0)
-		bit2 = reader.getBitAt(byte4, 1)
+		bit1, err = reader.getBitAt(byte4, 0)
+		if err != nil {
+			return 0, err
+		}
+
+		bit2, err = reader.getBitAt(byte4, 1)
+		if err != nil {
+			return 0, err
+		}
 
 		if bit1 == false || bit2 == true {
 			log.Printf("%08b, %08b, %08b, %08b, error in the fourth byte", byte1, byte2, byte3, byte4)
