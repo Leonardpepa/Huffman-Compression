@@ -132,11 +132,27 @@ func TestReadBitAtPosition(t *testing.T) {
 	t.Run("read the bit at position i", func(t *testing.T) {
 		b := make([]byte, 0)
 
-		b = append(b, byte(0b00100000))
+		b = append(b, byte(0b00100001))
 
 		reader := CreateBitReader(b)
 
-		bit, err := reader.getBitAt(reader.Bytes()[0], 2)
+		bit, err := reader.getBitAt(reader.Bytes()[0], 0)
+
+		checkerr(t, err)
+
+		if bit {
+			t.Errorf("expected 0, got %d", btoi(bit))
+		}
+
+		bit, err = reader.getBitAt(reader.Bytes()[0], 2)
+
+		checkerr(t, err)
+
+		if !bit {
+			t.Errorf("expected 1, got %d", btoi(bit))
+		}
+
+		bit, err = reader.getBitAt(reader.Bytes()[0], 7)
 
 		checkerr(t, err)
 
