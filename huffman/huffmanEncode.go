@@ -193,13 +193,20 @@ func createBits(file *os.File, bitWriter *bitstream.Writer, table map[rune]strin
 		}
 
 		for _, value := range table[r] {
-			bitWriter.WriteBitFromChar(value)
+			err := bitWriter.WriteBitFromChar(value)
+
+			if err != nil {
+				return err
+			}
 		}
 	}
 
 	// Pseudo EOF
 	for _, value := range table[PseudoEOF] {
-		bitWriter.WriteBitFromChar(value)
+		err := bitWriter.WriteBitFromChar(value)
+		if err != nil {
+			return err
+		}
 	}
 
 	//// finish the writing

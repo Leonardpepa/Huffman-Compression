@@ -1,7 +1,7 @@
 package bitstream
 
 import (
-	"log"
+	"fmt"
 	"unicode/utf8"
 )
 
@@ -30,14 +30,14 @@ func (writer *Writer) BitPosition() uint {
 	return writer.count
 }
 
-func (writer *Writer) WriteBitFromChar(bit rune) {
+func (writer *Writer) WriteBitFromChar(bit rune) error {
 	switch bit {
 	case '1':
 		writer.current = writer.current<<1 | 1
 	case '0':
 		writer.current = writer.current << 1
 	default:
-		log.Fatal("Bit must be 0 or 1")
+		return fmt.Errorf("Bit must be 0 or 1")
 	}
 
 	writer.count++
@@ -45,6 +45,8 @@ func (writer *Writer) WriteBitFromChar(bit rune) {
 	if writer.count == 8 {
 		writer.appendByte()
 	}
+
+	return nil
 }
 
 func (writer *Writer) WriteBitFromBool(bit bool) {
