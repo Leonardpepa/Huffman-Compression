@@ -80,6 +80,13 @@ func TestReadBit(t *testing.T) {
 	if !bit8 {
 		t.Errorf("expected bit8: 1, got %d", btoi(bit8))
 	}
+
+	bit9, err := reader.Read()
+
+	if err == nil {
+		t.Errorf("expected no more bits,  got %d", btoi(bit9))
+	}
+
 }
 
 func TestReadByte(t *testing.T) {
@@ -148,7 +155,7 @@ func TestHasNext(t *testing.T) {
 		count++
 	}
 
-	if count != 8 {
-		t.Errorf("expeted count 8, got %d", count)
+	if count != reader.SizeOfBits() {
+		t.Errorf("expeted count %d, got %d", reader.SizeOfBits(), count)
 	}
 }
