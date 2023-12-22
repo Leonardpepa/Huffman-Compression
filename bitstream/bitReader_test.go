@@ -5,7 +5,7 @@ import (
 	"unicode/utf8"
 )
 
-func btoi(b bool) int {
+func btoi(b bool) int8 {
 	if b {
 		return 1
 	}
