@@ -45,12 +45,21 @@ func (reader *Reader) getBitAt(num byte, i int) (bool, error) {
 }
 
 func (reader *Reader) HasNext() bool {
+	if len(reader.Bytes()) == 0 {
+		return false
+	}
+
 	return reader.offset < reader.length
 }
 
 func (reader *Reader) Read() (bool, error) {
+
+	if len(reader.Bytes()) == 0 {
+		return false, fmt.Errorf("buffer is empty")
+	}
+
 	if reader.HasNext() == false {
-		return false, fmt.Errorf("No more bits to read.")
+		return false, fmt.Errorf("no more bits to read")
 	}
 
 	bit, err := reader.getBitAt(reader.data[reader.offset], reader.count)
@@ -69,6 +78,9 @@ func (reader *Reader) Read() (bool, error) {
 
 // reads utf8 rune
 func (reader *Reader) ReadChar() (rune, error) {
+	if len(reader.Bytes()) == 0 {
+		return 0, fmt.Errorf("buffer is empty")
+	}
 
 	byte1, err := reader.ReadByte()
 
@@ -256,6 +268,10 @@ func (reader *Reader) ReadChar() (rune, error) {
 }
 
 func (reader *Reader) ReadByte() (byte, error) {
+	if len(reader.Bytes()) == 0 {
+		return 0, fmt.Errorf("buffer is empty")
+	}
+
 	writer := CreateBitWriter()
 	for reader.HasNext() {
 		bit, err := reader.Read()
