@@ -64,6 +64,7 @@ func (reader *Reader) Read() bool {
 	return bit
 }
 
+// reads utf8 rune
 func (reader *Reader) ReadChar() (rune, error) {
 
 	byte1, err := reader.ReadByte()
