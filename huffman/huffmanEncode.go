@@ -190,23 +190,29 @@ func createBits(file *os.File, bitWriter *bitstream.Writer, table map[rune]strin
 			return err
 		}
 
-		for _, value := range table[r] {
-			err := bitWriter.WriteBitFromChar(value)
-
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	// Pseudo EOF
-	for _, value := range table[PseudoEOF] {
-		err := bitWriter.WriteBitFromChar(value)
+		err = encodeBitCode(table, r, bitWriter)
 		if err != nil {
 			return err
 		}
 	}
 
+	// Pseudo EOF
+	err = encodeBitCode(table, PseudoEOF, bitWriter)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func encodeBitCode(table map[rune]string, r rune, bitWriter *bitstream.Writer) error {
+	for _, value := range table[r] {
+		err := bitWriter.WriteBitFromChar(value)
+
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

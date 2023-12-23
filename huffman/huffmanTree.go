@@ -65,7 +65,7 @@ func CreateLeafNode(char rune, freq uint64) *TreeNode {
 func CreateHuffmanNode(a *TreeNode, b *TreeNode) *TreeNode {
 	var leftNode *TreeNode
 	var rightNode *TreeNode
-	if a.Weight < b.Weight {
+	if a.Weight <= b.Weight {
 		leftNode = a
 		rightNode = b
 	} else {
