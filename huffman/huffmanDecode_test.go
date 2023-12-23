@@ -64,16 +64,15 @@ func TestDecodedText(t *testing.T) {
 func TestCreateTreeFromHeader(t *testing.T) {
 	t.Run("should create the tree by reading the header information", func(t *testing.T) {
 		frequencies := map[rune]uint64{
-			'Z': 2,
-			'K': 7,
-			'M': 24,
 			'C': 32,
 			'D': 42,
-			'L': 42,
-			'U': 37,
 			'E': 120,
+			'K': 7,
+			'L': 42,
+			'M': 24,
+			'U': 37,
+			'Z': 2,
 		}
-
 		root := CreateHuffmanTreeFromFrequencies(frequencies)
 
 		expected := make([]rune, 0)
