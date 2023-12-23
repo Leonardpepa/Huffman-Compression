@@ -27,7 +27,7 @@ func Encode(file *os.File, output string) error {
 	}
 
 	log.Println("Calculating variable length codes... ")
-	table := CalculateCodeForEachChar(root)
+	table := CalculateBitCodes(root)
 
 	bitWriter := bitstream.CreateBitWriter()
 
@@ -79,8 +79,6 @@ func encodeHuffmanHeaderInformation(node *TreeNode, encodeType int, writer *bits
 	case InOrder:
 		err = recursiveInOrderHeaderEncoding(node, writer, &count)
 	}
-	//// stop here
-	//writer.Flush()
 
 	if err != nil {
 		return 0, err
@@ -208,9 +206,6 @@ func createBits(file *os.File, bitWriter *bitstream.Writer, table map[rune]strin
 			return err
 		}
 	}
-
-	//// finish the writing
-	//bitWriter.Flush()
 
 	return nil
 }

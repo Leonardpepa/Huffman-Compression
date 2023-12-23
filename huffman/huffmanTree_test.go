@@ -2,6 +2,7 @@ package huffman
 
 import (
 	"container/heap"
+	"maps"
 	"slices"
 	"testing"
 )
@@ -71,7 +72,42 @@ func TestBuildHuffmanTree(t *testing.T) {
 		expected := []rune{'E', 'U', 'D', 'L', 'C', 'Z', 'K', 'M'}
 
 		if !slices.EqualFunc(expected, charsInorder, func(r rune, r2 rune) bool { return r == r2 }) {
-			t.Errorf("something went wrong when building the tree")
+			t.Errorf("something went wrong when building the tree, expected %v, got %v", expected, charsInorder)
 		}
+	})
+}
+
+func TestCalculateBitCodes(t *testing.T) {
+	t.Run("create bit codes for each character", func(t *testing.T) {
+		frequencies := map[rune]uint64{
+			'M': 24,
+			'C': 32,
+			'K': 7,
+			'D': 42,
+			'E': 120,
+			'L': 42,
+			'U': 37,
+			'Z': 2,
+		}
+
+		root := CreateHuffmanTreeFromFrequencies(frequencies)
+
+		table := CalculateBitCodes(root)
+
+		expected := map[rune]string{
+			'M': "11111",
+			'C': "1110",
+			'K': "111101",
+			'D': "101",
+			'E': "0",
+			'L': "110",
+			'U': "100",
+			'Z': "111100",
+		}
+
+		if !maps.Equal(expected, table) {
+			t.Errorf("something went wrong when calculating the bit codes expected %v, got %v", expected, table)
+		}
+
 	})
 }

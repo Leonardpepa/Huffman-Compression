@@ -143,7 +143,7 @@ func getInorderChars(root *TreeNode, chars *[]rune) {
 	}
 }
 
-func CalculateCodeForEachChar(node *TreeNode) map[rune]string {
+func CalculateBitCodes(node *TreeNode) map[rune]string {
 	table := make(map[rune]string)
 	calculateCode(node, table, "")
 	return table
