@@ -2,9 +2,11 @@ package huffman
 
 import (
 	"container/heap"
+	"slices"
 	"testing"
 )
 
+// https://opendsa-server.cs.vt.edu/ODSA/Books/CS3/html/Huffman.html
 func TestCreatePriorityQueue(t *testing.T) {
 	t.Run("create priority queue from frequency table", func(t *testing.T) {
 		frequencies := map[rune]uint64{
@@ -44,5 +46,32 @@ func TestCreatePriorityQueue(t *testing.T) {
 			t.Errorf("wron priority queue size expected 1. got %d", pq.Len())
 		}
 
+	})
+}
+
+func TestBuildHuffmanTree(t *testing.T) {
+	t.Run("return a huffman tree", func(t *testing.T) {
+		frequencies := map[rune]uint64{
+			'M': 24,
+			'C': 32,
+			'K': 7,
+			'D': 42,
+			'E': 120,
+			'L': 42,
+			'U': 37,
+			'Z': 2,
+		}
+
+		root := CreateHuffmanTreeFromFrequencies(frequencies)
+
+		charsInorder := make([]rune, 0)
+
+		getInorderChars(root, &charsInorder)
+
+		expected := []rune{'E', 'U', 'D', 'L', 'C', 'Z', 'K', 'M'}
+
+		if !slices.EqualFunc(expected, charsInorder, func(r rune, r2 rune) bool { return r == r2 }) {
+			t.Errorf("something went wrong when building the tree")
+		}
 	})
 }

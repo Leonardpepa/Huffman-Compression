@@ -129,6 +129,20 @@ func TraverseTreeInorder(root *TreeNode) {
 	}
 }
 
+func getInorderChars(root *TreeNode, chars *[]rune) {
+	if root.Left != nil {
+		getInorderChars(root.Left, chars)
+	}
+
+	if root != nil && root.IsLeaf {
+		*chars = append(*chars, root.Char)
+	}
+
+	if root.Right != nil {
+		getInorderChars(root.Right, chars)
+	}
+}
+
 func CalculateCodeForEachChar(node *TreeNode) map[rune]string {
 	table := make(map[rune]string)
 	calculateCode(node, table, "")
