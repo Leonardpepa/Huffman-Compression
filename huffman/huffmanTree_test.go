@@ -53,14 +53,14 @@ func TestCreatePriorityQueue(t *testing.T) {
 func TestBuildHuffmanTree(t *testing.T) {
 	t.Run("return a huffman tree", func(t *testing.T) {
 		frequencies := map[rune]uint64{
+			'Z': 2,
+			'K': 7,
 			'M': 24,
 			'C': 32,
-			'K': 7,
 			'D': 42,
-			'E': 120,
 			'L': 42,
 			'U': 37,
-			'Z': 2,
+			'E': 120,
 		}
 
 		root := CreateHuffmanTreeFromFrequencies(frequencies)
@@ -80,14 +80,14 @@ func TestBuildHuffmanTree(t *testing.T) {
 func TestCalculateBitCodes(t *testing.T) {
 	t.Run("create bit codes for each character", func(t *testing.T) {
 		frequencies := map[rune]uint64{
+			'Z': 2,
+			'K': 7,
 			'M': 24,
 			'C': 32,
-			'K': 7,
 			'D': 42,
-			'E': 120,
 			'L': 42,
 			'U': 37,
-			'Z': 2,
+			'E': 120,
 		}
 
 		root := CreateHuffmanTreeFromFrequencies(frequencies)

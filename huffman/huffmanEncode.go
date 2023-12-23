@@ -57,13 +57,31 @@ func Encode(file *os.File, output string) error {
 	data = append(data, b...)
 	data = append(data, bitWriter.Bytes()...)
 
-	err = os.WriteFile(output, data, 0666)
+	created, err := os.Create(output)
 
 	if err != nil {
 		return err
 	}
 
-	log.Println("Encoding finished. File: ", output)
+	_, err = created.Write(data)
+
+	if err != nil {
+		return err
+	}
+
+	//_, err = file.Seek(0, io.SeekStart)
+	//if err != nil {
+	//	return err
+	//}
+	//
+	originalFileStats, err := file.Stat()
+	stat, err := created.Stat()
+
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Encoding finished. File: %s, Original: (%d bytes) compressed: (%d bytes)\n", output, originalFileStats.Size(), stat.Size())
 	return nil
 }
 

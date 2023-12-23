@@ -38,13 +38,25 @@ func Decode(file *os.File, output string) error {
 		return err
 	}
 
-	err = os.WriteFile(output, []byte(*text), 0666)
+	created, err := os.Create(output)
 
 	if err != nil {
 		return err
 	}
 
-	log.Println("Decoding finished. File: ", output)
+	_, err = created.WriteString(*text)
+
+	if err != nil {
+		return err
+	}
+
+	stat, err := created.Stat()
+
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Decoding finished. File: %s, Bytes: %d\n", output, stat.Size())
 	return nil
 }
 
