@@ -92,7 +92,7 @@ func TestCalculateBitCodes(t *testing.T) {
 		root := CreateHuffmanTreeFromFrequencies(frequencies)
 
 		table := CalculateBitCodes(root)
-		TraverseTreeInorder(root)
+
 		expected := map[rune]string{
 			'M': "11111",
 			'C': "1110",
