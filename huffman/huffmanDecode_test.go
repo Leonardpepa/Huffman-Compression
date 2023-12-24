@@ -14,7 +14,7 @@ func TestDecodedText(t *testing.T) {
 			'K': 7,
 			'D': 42,
 			'E': 120,
-			'L': 42,
+			'L': 43,
 			'U': 37,
 			'Z': 2,
 		}
@@ -64,12 +64,12 @@ func TestDecodedText(t *testing.T) {
 func TestCreateTreeFromHeader(t *testing.T) {
 	t.Run("should create the tree by reading the header information", func(t *testing.T) {
 		frequencies := map[rune]uint64{
+			'M': 24,
 			'C': 32,
+			'K': 7,
 			'D': 42,
 			'E': 120,
-			'K': 7,
-			'L': 42,
-			'M': 24,
+			'L': 43,
 			'U': 37,
 			'Z': 2,
 		}
