@@ -60,10 +60,8 @@ func Encode(file *os.File, output string) error {
 	//ensure all bits are written
 	bitWriter.Flush()
 
-	sizeRune := rune(size)
-
-	b := make([]byte, utf8.RuneLen(sizeRune))
-	utf8.EncodeRune(b, sizeRune)
+	b := make([]byte, utf8.RuneLen(rune(size)))
+	utf8.EncodeRune(b, rune(size))
 
 	data := make([]byte, 0)
 
