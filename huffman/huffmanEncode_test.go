@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestCreateBits(t *testing.T) {
+func TestEncodeBits(t *testing.T) {
 	t.Run("should encode the content bit by bit", func(t *testing.T) {
 		frequencies := map[rune]uint64{
 			'M': 24,
