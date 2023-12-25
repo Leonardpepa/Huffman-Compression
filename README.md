@@ -18,7 +18,7 @@ writes the tree structure in the file header using preorder traversal, writing 0
 and 1 followed by the character for each leaf node. The size of the header is stored first followed by the actual information needed to create the tree
 
 ## Pseudo EOF
-Because the operate in byte chunks and this algorithm writes the encoded content bit by bit
+Because files operate in byte chunks and this algorithm writes the encoded content bit by bit
 we need a way to know when the file contents end, inorder to avoid reading any junk bits added to fill the last byte.
 This implementation uses the technique of the Pseudo EOF. The fixed-length code of the Pseudo EOF is stored at the end of the file. 
 The program stops reading when it encounters the Pseudo EOF. The Pseudo EOF is a character that doesn't occur in the original file.
