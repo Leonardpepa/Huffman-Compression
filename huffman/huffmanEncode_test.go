@@ -8,7 +8,7 @@ import (
 )
 
 func TestCreateBits(t *testing.T) {
-	t.Run("shoud encode the content bit by bit", func(t *testing.T) {
+	t.Run("should encode the content bit by bit", func(t *testing.T) {
 		frequencies := map[rune]uint64{
 			'M': 24,
 			'C': 32,
@@ -25,9 +25,9 @@ func TestCreateBits(t *testing.T) {
 		table := CalculateBitCodes(root)
 		writer := bitstream.CreateBitWriter()
 
-		text := "MKLUL"
+		text := "MKLULC"
 
-		err := createBits(bufio.NewReader(bytes.NewReader([]byte(text))), &writer, table)
+		err := encodeBits(bufio.NewReader(bytes.NewReader([]byte(text))), &writer, table)
 
 		if err != nil {
 			t.Error(err)
@@ -41,8 +41,25 @@ func TestCreateBits(t *testing.T) {
 			expectedBits += table[val]
 		}
 
-		// 11111 111101 110 100 110 EOF
-		//reader := bitstream.CreateBitReader(writer.Bytes())
+		// 11111 111101 110 100 110 1110
+		reader := bitstream.CreateBitReader(writer.Bytes())
+		got := ""
 
+		for reader.HasNext() {
+			bit, err := reader.Read()
+
+			if err != nil {
+				t.Error(err)
+			}
+			if bit {
+				got += string('1')
+			} else {
+				got += string('0')
+			}
+		}
+
+		if expectedBits != got {
+			t.Errorf("expected %s, got %s", expectedBits, got)
+		}
 	})
 }

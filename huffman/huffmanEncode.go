@@ -45,12 +45,19 @@ func Encode(file *os.File, output string) error {
 		return err
 	}
 
-	err = createBits(bufio.NewReader(file), &bitWriter, table)
+	err = encodeBits(bufio.NewReader(file), &bitWriter, table)
 
 	if err != nil {
 		return err
 	}
 
+	// Pseudo eof
+	err = encodeBitCode(table, PseudoEOF, &bitWriter)
+	if err != nil {
+		return err
+	}
+
+	//ensure all bits are written
 	bitWriter.Flush()
 
 	sizeRune := rune(size)
@@ -191,7 +198,7 @@ func recursiveInOrderHeaderEncoding(node *TreeNode, writer *bitstream.Writer, co
 	return err
 }
 
-func createBits(reader *bufio.Reader, bitWriter *bitstream.Writer, table map[rune]string) error {
+func encodeBits(reader *bufio.Reader, bitWriter *bitstream.Writer, table map[rune]string) error {
 	for {
 		r, _, err := reader.ReadRune()
 
@@ -207,13 +214,6 @@ func createBits(reader *bufio.Reader, bitWriter *bitstream.Writer, table map[run
 			return err
 		}
 	}
-
-	// Pseudo EOF
-	err := encodeBitCode(table, PseudoEOF, bitWriter)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
