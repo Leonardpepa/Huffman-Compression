@@ -38,6 +38,13 @@ func main() {
 	if *compress {
 		file := openFile(flag.Args()[0])
 
+		defer func(file *os.File) {
+			err := file.Close()
+			if err != nil {
+				log.Println(err)
+			}
+		}(file)
+
 		// add the .hf extension
 		outputPath := filepath.Base(file.Name()) + ".hf"
 		err := huffman.Encode(file, outputPath)
@@ -48,6 +55,13 @@ func main() {
 
 	} else if *decompress {
 		file := openFile(flag.Args()[0])
+
+		defer func(file *os.File) {
+			err := file.Close()
+			if err != nil {
+				log.Println(err)
+			}
+		}(file)
 
 		// remove the .hf extension
 		outputPath := strings.Split(filepath.Base(file.Name()), ".hf")[0]
