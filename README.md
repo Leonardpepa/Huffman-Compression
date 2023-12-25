@@ -15,7 +15,7 @@ This is an implementation of the huffman compression algorithm. Read how it work
 ## header - Huffman Topology
 In order to decode the file we need the original tree that was used to encode the file. This implementation
 writes the tree structure in the file header using preorder traversal, writing 0 for each internal node
-and 1 followed by the character for each leaf node. The size of the header is stored first followed by the actual information needed to created the tree
+and 1 followed by the character for each leaf node. The size of the header is stored first followed by the actual information needed to create the tree
 
 ## Pseudo EOF
 Because the operate in byte chunks and this algorithm writes the encoded content bit by bit
