@@ -1,6 +1,6 @@
 # Huffman Compression written in go
 
-## Purpose
+# Purpose
 This project is a solution for [Write Your Own Compression Tool](https://codingchallenges.fyi/challenges/challenge-huffman)
 build for my personal educational purposes
 
