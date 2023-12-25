@@ -75,7 +75,7 @@ func main() {
 
 func usage() {
 	log.Fatalf(`
-Usage: %s [OPTIONS]... [FILE]
+Usage: %s [OPTION] [FILE]
 [OPTIONS]:
   -c FILE ~file to compress
   -d FILE ~file to decompress

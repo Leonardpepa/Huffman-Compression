@@ -29,7 +29,7 @@ Because go doesn't provide such functionality, bitstream package was implemented
 
 # Usage
 ```terminal
-Usage: ./huffmanCompression.exe [OPTION]... [FILE]
+Usage: ./huffmanCompression.exe [OPTION] [FILE]
 [OPTIONS]:
 -c FILE ~file to compress
 -d FILE ~file to decompress
