@@ -25,7 +25,7 @@ The program stops reading when it encounters the Pseudo EOF. The Pseudo EOF is a
 
 ## Bit Stream
 To achieve compression the bit strings of the fixed-length codes for the characters need to be stored bit by bit in the file.
-Because go doesn't provide such functionality, bitstream package was implemented from scratch inorder to be able to read and write bits, bytes and runes bit by bit.
+Because go doesn't provide such functionality, bitstream package was implemented from scratch to be able to read and write bits, bytes and runes bit by bit.
 
 # Usage
 ```terminal
