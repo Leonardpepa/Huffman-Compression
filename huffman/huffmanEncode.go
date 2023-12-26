@@ -16,7 +16,7 @@ const (
 	InOrder
 )
 
-var PseudoEOF = rune(256)
+var PseudoEOF = '\U000FFFFD'
 
 func Encode(file *os.File, output string) error {
 	log.Println("Creating huffman tree... ")
