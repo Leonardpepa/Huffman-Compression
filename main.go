@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"huffmanCompression/huffman"
 	"log"
 	"os"
@@ -12,19 +13,22 @@ import (
 var programName = filepath.Base(os.Args[0])
 
 func main() {
-
+	var help bool
 	compress := flag.Bool("c", false, "Specify a file to compress")
 	decompress := flag.Bool("d", false, "Specify a file to decompress")
-	help := flag.Bool("h", false, "Usage")
+	flag.BoolVar(&help, "h", false, "Usage")
+	flag.BoolVar(&help, "help", false, "Usage")
 
 	flag.Parse()
 
-	if *help {
+	if help {
 		usage()
+		os.Exit(0)
 	}
 
 	if *compress == false && *decompress == false {
 		usage()
+		os.Exit(1)
 	}
 
 	if *compress && *decompress {
@@ -74,7 +78,7 @@ func main() {
 }
 
 func usage() {
-	log.Fatalf(`
+	fmt.Printf(`
 Usage: %s [OPTION] [FILE]
 [OPTIONS]:
   -c FILE ~file to compress
